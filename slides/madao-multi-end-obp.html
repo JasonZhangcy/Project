@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>码道多端协同能力规划</title>
+<style>
+@font-face {
+  font-family: "WQ";
+  src: url("file:///usr/share/fonts/truetype/wqy/wqy-microhei.ttc") format("truetype");
+  font-weight: 400;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 1920px; height: 1080px; overflow: hidden;
+  background: #eef1f6;
+  font-family: "WQ", "WenQuanYi Micro Hei", "Microsoft YaHei", sans-serif;
+  color: #1c2b3a;
+}
+.slide {
+  width: 1920px; height: 1080px;
+  background: linear-gradient(180deg, #f7f8fb 0%, #eef1f6 100%);
+  position: relative;
+}
+
+/* ===== Header ===== */
+.header {
+  height: 78px;
+  background: linear-gradient(90deg, #081526 0%, #12304f 55%, #0c2340 100%);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px 0 0;
+  position: relative;
+}
+.header::before {
+  content: "";
+  position: absolute; left: 0; top: 0; bottom: 0; width: 8px;
+  background: #c7000b;
+}
+.header-left { padding-left: 32px; display: flex; flex-direction: column; gap: 4px; }
+.kicker {
+  font-size: 13px; letter-spacing: 2px; color: #8fb4d4; font-weight: 400;
+}
+.title-row { display: flex; align-items: baseline; gap: 14px; }
+.title { font-size: 32px; color: #fff; letter-spacing: 0.5px; line-height: 1; }
+.title em { color: #ffd166; font-style: normal; }
+.subtitle { font-size: 15px; color: #b7cce0; }
+.header-right {
+  display: flex; align-items: center; gap: 10px;
+}
+.pill-dark {
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.18);
+  color: #e8f1f8;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 14px;
+}
+
+/* ===== Body ===== */
+.body {
+  display: flex;
+  height: 968px;
+  padding: 14px 16px 12px 16px;
+  gap: 14px;
+}
+.left {
+  width: 1248px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.right {
+  width: 626px;
+  display: flex; flex-direction: column;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(16, 32, 64, .08);
+  overflow: hidden;
+  border: 1px solid #e4e9f0;
+}
+
+/* ===== Scenarios ===== */
+.scenarios {
+  background: #fff;
+  border: 1px solid #e4e9f0;
+  border-radius: 10px;
+  padding: 8px 10px 9px 10px;
+  box-shadow: 0 1px 4px rgba(16,32,64,.05);
+}
+.sec-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: #5a6a7a; margin-bottom: 7px; letter-spacing: .5px;
+}
+.sec-label .bar { width: 4px; height: 13px; background: #c7000b; border-radius: 2px; }
+.sec-label b { color: #0b1f3a; font-size: 14px; font-weight: 400; }
+.scene-row { display: flex; gap: 8px; }
+.scene {
+  flex: 1;
+  display: flex; gap: 8px; align-items: flex-start;
+  background: #f6f8fb;
+  border: 1px solid #e7edf4;
+  border-radius: 8px;
+  padding: 8px 10px;
+  min-height: 58px;
+}
+.scene .tag {
+  flex: 0 0 22px; height: 22px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 12px;
+}
+.scene p { font-size: 13px; line-height: 1.35; color: #243546; }
+.scene p strong { color: #0b1f3a; }
+.s1 .tag { background: #1b6bb8; }
+.s2 .tag { background: #0f766e; }
+.s3 .tag { background: #c2410c; }
+.s4 .tag { background: #5b4bdb; }
+
+/* ===== Five ends ===== */
+.ends {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.end {
+  background: #fff;
+  border: 1px solid #e4e9f0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(16,32,64,.05);
+  display: flex; flex-direction: column;
+  min-height: 248px;
+}
+.end-h {
+  padding: 8px 10px 7px;
+  color: #fff;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.end-h .name { font-size: 16px; letter-spacing: .3px; }
+.end-h .pos { font-size: 11.5px; opacity: .92; line-height: 1.3; }
+.ide .end-h { background: linear-gradient(90deg, #155a9c, #1b6bb8); }
+.cli .end-h { background: linear-gradient(90deg, #2c3a47, #445566); }
+.space .end-h { background: linear-gradient(90deg, #0c5f58, #0f766e); }
+.web .end-h { background: linear-gradient(90deg, #4a3cc0, #5b4bdb); }
+.mob .end-h { background: linear-gradient(90deg, #b33a0a, #c2410c); }
+.end ul {
+  list-style: none;
+  padding: 8px 10px 8px;
+  display: flex; flex-direction: column; gap: 5px;
+  flex: 1;
+}
+.end li {
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: #2a3b4c;
+  padding-left: 11px;
+  position: relative;
+}
+.end li::before {
+  content: "";
+  position: absolute; left: 0; top: 6px;
+  width: 5px; height: 5px; border-radius: 50%;
+}
+.ide li::before { background: #1b6bb8; }
+.cli li::before { background: #5a6b7c; }
+.space li::before { background: #0f766e; }
+.web li::before { background: #5b4bdb; }
+.mob li::before { background: #c2410c; }
+
+/* ===== Collaboration diagram ===== */
+.collab {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #e4e9f0;
+  border-radius: 10px;
+  padding: 8px 12px 10px;
+  box-shadow: 0 1px 4px rgba(16,32,64,.05);
+  display: flex; flex-direction: column; min-height: 0;
+}
+.collab-title { margin-bottom: 8px; }
+
+.flow {
+  display: flex; align-items: stretch; gap: 0;
+  height: 118px;
+  margin-bottom: 8px;
+}
+.flow-step {
+  flex: 1;
+  border-radius: 8px;
+  padding: 8px 10px;
+  position: relative;
+  display: flex; flex-direction: column; justify-content: center;
+  color: #fff;
+}
+.flow-step .n {
+  font-size: 11px; opacity: .85; letter-spacing: 1px;
+}
+.flow-step .t { font-size: 16px; margin: 2px 0 3px; }
+.flow-step .d { font-size: 12px; line-height: 1.3; opacity: .95; }
+.f1 { background: linear-gradient(135deg, #155a9c, #1f7ad0); }
+.f2 { background: linear-gradient(135deg, #7a1d12, #c7000b); }
+.f3 { background: linear-gradient(135deg, #3d32b0, #5b4bdb); }
+.f4 { background: linear-gradient(135deg, #9a3412, #c2410c); }
+.f5 { background: linear-gradient(135deg, #0c5f58, #0f766e); }
+.chev {
+  width: 22px; flex: 0 0 22px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; z-index: 2;
+}
+.chev svg { width: 18px; height: 36px; }
+
+.sync-row {
+  display: grid;
+  grid-template-columns: 1.15fr 1.35fr 1.15fr;
+  gap: 8px;
+  flex: 1;
+}
+.panel {
+  border-radius: 8px;
+  border: 1px solid #dbe3ee;
+  background: #f7f9fc;
+  padding: 8px 10px;
+}
+.panel h4 {
+  font-size: 13px; color: #0b1f3a; margin-bottom: 6px;
+  display: flex; align-items: center; gap: 6px;
+  font-weight: 400;
+}
+.dot {
+  width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+}
+.panel ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.panel li { font-size: 12.5px; line-height: 1.35; color: #2c3e50; }
+.hub {
+  background: linear-gradient(180deg, #0d2238 0%, #12304f 100%);
+  border: none;
+  color: #fff;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.hub h4 { color: #fff; font-size: 14px; margin-bottom: 7px; }
+.hub .hub-main {
+  font-size: 18px; color: #ffd166; margin-bottom: 6px; letter-spacing: .3px;
+}
+.hub p { font-size: 12.5px; line-height: 1.45; color: #d5e4f2; }
+.arrows {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px;
+}
+.arr {
+  font-size: 11.5px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.12);
+  color: #eaf4ff;
+  border: 1px solid rgba(255,255,255,.18);
+}
+
+/* ===== Right panel ===== */
+.rtop {
+  background: linear-gradient(90deg, #c7000b, #e31c23);
+  color: #fff;
+  padding: 10px 16px 9px;
+  display: flex; align-items: baseline; justify-content: space-between;
+}
+.rtop h2 { font-size: 18px; font-weight: 400; }
+.rtop span { font-size: 12px; opacity: .9; }
+.rbody { padding: 10px 12px 10px; display: flex; flex-direction: column; gap: 9px; flex: 1; }
+
+.block { }
+.block-h {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 6px;
+}
+.num {
+  width: 22px; height: 22px; border-radius: 4px;
+  background: #c7000b; color: #fff;
+  font-size: 12px; display: flex; align-items: center; justify-content: center;
+}
+.block-h h3 { font-size: 14px; color: #0b1f3a; font-weight: 400; }
+
+.kpi {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+}
+.kpi-item {
+  background: #f6f8fb;
+  border: 1px solid #e7edf4;
+  border-radius: 7px;
+  padding: 7px 8px 6px;
+}
+.kpi-item .k { font-size: 12px; color: #5a6a7a; }
+.kpi-item .v { font-size: 15px; color: #c7000b; margin: 2px 0 1px; }
+.kpi-item .s { font-size: 11.5px; color: #3d5163; line-height: 1.3; }
+
+.feat {
+  display: flex; gap: 8px;
+  border: 1px solid #e7edf4;
+  border-radius: 7px;
+  background: #fff;
+  overflow: hidden;
+  min-height: 62px;
+}
+.feat-l {
+  width: 72px; flex: 0 0 72px;
+  color: #fff;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: 13px; letter-spacing: .3px;
+}
+.feat-l small { font-size: 10.5px; opacity: .9; margin-top: 2px; }
+.feat.ide .feat-l { background: #1b6bb8; }
+.feat.cli .feat-l { background: #445566; }
+.feat.space .feat-l { background: #0f766e; }
+.feat.web .feat-l { background: #5b4bdb; }
+.feat.mob .feat-l { background: #c2410c; }
+.feat-r { padding: 6px 9px 6px 0; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.feat-r .line { font-size: 12.5px; color: #243546; line-height: 1.35; }
+.feat-r .metric {
+  margin-top: 3px;
+  font-size: 12px;
+  color: #c7000b;
+}
+
+.note {
+  margin-top: auto;
+  font-size: 11.5px;
+  color: #6a7a8a;
+  line-height: 1.4;
+  padding-top: 4px;
+  border-top: 1px dashed #e0e6ee;
+}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="header">
+    <div class="header-left">
+      <div class="kicker">HUAWEI CLOUD · 码道 OBP</div>
+      <div class="title-row">
+        <div class="title">多端协同能力规划 · <em>一套 Agent，五端一体</em></div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="pill-dark">专业开发：IDE / CLI</div>
+      <div class="pill-dark">泛研发办公：Space</div>
+      <div class="pill-dark">云端仓：Web</div>
+      <div class="pill-dark">驾驭面：Mobile</div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="left">
+      <div class="scenarios">
+        <div class="sec-label"><span class="bar"></span><b>典型使用场景</b><span>放在架构之上，表现同一任务如何跨端流转</span></div>
+        <div class="scene-row">
+          <div class="scene s1">
+            <div class="tag">A</div>
+            <p><strong>工位上云，通勤接着干。</strong>IDE 重构中途开会，一键转云端；手机看进度、批高危命令；晚上 CLI apply 回本地审 diff。</p>
+          </div>
+          <div class="scene s2">
+            <div class="tag">B</div>
+            <p><strong>Space 做完前半段。</strong>专家团 + DeepResearch 出方案/原型，一键交给 Web 云端 Agent 改仓开 PR，开发者次日只做审查。</p>
+          </div>
+          <div class="scene s3">
+            <div class="tag">C</div>
+            <p><strong>值班告警，人不在工位。</strong>流水线失败打到微信/元服务，Mobile 派发云端修复并审批出网，Web 出现 PR，Space 同步可见。</p>
+          </div>
+          <div class="scene s4">
+            <div class="tag">D</div>
+            <p><strong>Agent 装进流水线。</strong>CLI 非交互在 CI 预审查；失败升 Web 长程任务；全员在任务总线看见结果，不必进 IDE。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="ends">
+        <div class="end ide">
+          <div class="end-h">
+            <div class="name">码道 IDE</div>
+            <div class="pos">专业开发者 · 人机结对工作台</div>
+          </div>
+          <ul>
+            <li>Next Edit / Agent 测试闭环，人在环内改代码、看 diff</li>
+            <li>Local ↔ Cloud 环境切换，会话可检查点回滚</li>
+            <li>工程规则 / MCP / 浏览器内验证，不把 IDE 做成聊天窗</li>
+          </ul>
+        </div>
+        <div class="end cli">
+          <div class="end-h">
+            <div class="name">码道 CLI</div>
+            <div class="pos">专业开发者 · Agent 引擎与自动化接口</div>
+          </div>
+          <ul>
+            <li>与 IDE 同引擎：CLI 是进程，IDE 是驾驶舱</li>
+            <li>cloud exec / apply 上云回灌，非交互进 CI</li>
+            <li>Skills / MCP / Hooks / 沙箱与 Token 预算，特性先在此落地</li>
+          </ul>
+        </div>
+        <div class="end space">
+          <div class="end-h">
+            <div class="name">码道 Space</div>
+            <div class="pos">泛研发 / 泛办公 · 一站式 AI 工作台</div>
+          </div>
+          <ul>
+            <li>专家 / 专家团、项目空间、技能与连接器</li>
+            <li>Computer Use / Browser Use、DeepResearch、多模态</li>
+            <li>产物导向；开发任务出口给 Web / IDE，不抢专业编码闭环</li>
+          </ul>
+        </div>
+        <div class="end web">
+          <div class="end-h">
+            <div class="name">码道 Web</div>
+            <div class="pos">云端执行 · Repo 为中心的 Agent 控制台</div>
+          </div>
+          <ul>
+            <li>预热沙箱、长程 / 并行 / 多仓，关盖继续跑</li>
+            <li>仓 + PR + Agent 同屏（对标 Origin，长在 CodeArts Repo）</li>
+            <li>仓库事件 Automations；PR 作为云端交接物</li>
+          </ul>
+        </div>
+        <div class="end mob">
+          <div class="end-h">
+            <div class="name">码道 Mobile</div>
+            <div class="pos">驾驭与审批面 · 不是迷你 IDE</div>
+          </div>
+          <ul>
+            <li>微信小程序 / 鸿蒙元服务 / App 三入口</li>
+            <li>看任务、控任务、批权限；可遥控本机或派发云端</li>
+            <li>竞争力在触达与权限，不在手机上写代码</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="collab">
+        <div class="sec-label collab-title">
+          <span class="bar"></span>
+          <b>端云协同怎么协同</b>
+          <span>同一 Task ID 在五端流转，换的是表面，不是任务身份</span>
+        </div>
+        <div class="flow">
+          <div class="flow-step f1">
+            <div class="n">STEP 01 · 本地</div>
+            <div class="t">起草与结对</div>
+            <div class="d">IDE / CLI / Space 本机开工，带上对话、计划与未提交改动</div>
+          </div>
+          <div class="chev"><svg viewBox="0 0 18 36"><polygon points="0,0 18,18 0,36" fill="#c7000b"/></svg></div>
+          <div class="flow-step f2">
+            <div class="n">STEP 02 · 迁移</div>
+            <div class="t">一键上云</div>
+            <div class="d">带着现场走：会话上下文 + dirty tree → 云端沙箱接着跑</div>
+          </div>
+          <div class="chev"><svg viewBox="0 0 18 36"><polygon points="0,0 18,18 0,36" fill="#c7000b"/></svg></div>
+          <div class="flow-step f3">
+            <div class="n">STEP 03 · 云端</div>
+            <div class="t">长程执行</div>
+            <div class="d">Web 沙箱 / Repo / PR，并行 Agent，流水线与预览成为手</div>
+          </div>
+          <div class="chev"><svg viewBox="0 0 18 36"><polygon points="0,0 18,18 0,36" fill="#c7000b"/></svg></div>
+          <div class="flow-step f4">
+            <div class="n">STEP 04 · 驾驭</div>
+            <div class="t">随时审批</div>
+            <div class="d">Mobile 暂停、追加指令、批高危命令；电脑离线也能派云端</div>
+          </div>
+          <div class="chev"><svg viewBox="0 0 18 36"><polygon points="0,0 18,18 0,36" fill="#c7000b"/></svg></div>
+          <div class="flow-step f5">
+            <div class="n">STEP 05 · 闭环</div>
+            <div class="t">回灌 / 验收</div>
+            <div class="d">IDE/CLI apply 回本地；Web 开 PR；Space 收可验收产物</div>
+          </div>
+        </div>
+        <div class="sync-row">
+          <div class="panel">
+            <h4><span class="dot" style="background:#1b6bb8"></span>本地工作面</h4>
+            <ul>
+              <li>IDE：高频结对、可视化 diff</li>
+              <li>CLI：无人值守、SSH / CI 脚本</li>
+              <li>Space：专家团把事做完，开发出口给 Web</li>
+            </ul>
+          </div>
+          <div class="panel hub">
+            <h4>中枢 · 不是五套产品</h4>
+            <div class="hub-main">统一任务总线 · Agent Runtime · CodeArts Repo</div>
+            <p>统一账号与权限。任务状态机：草稿 → 执行中（本地/云端）→ 待审批 → 待回灌 → 已关闭。任意端只改状态，不改任务身份。Space 能同步看到 Web 触发的云端任务。</p>
+            <div class="arrows">
+              <span class="arr">① 全域可见</span>
+              <span class="arr">② 一键上云（带现场）</span>
+              <span class="arr">③ 一键回灌</span>
+              <span class="arr">④ 远端驾驭 / 审批</span>
+            </div>
+          </div>
+          <div class="panel">
+            <h4><span class="dot" style="background:#5b4bdb"></span>云端与控制面</h4>
+            <ul>
+              <li>Web：预热沙箱 + 仓/PR/Agent 同屏</li>
+              <li>Mobile：微信 / 元服务 / App 驾驭</li>
+              <li>友商已能上云，差异在带着 dirty tree 与对话走</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="rtop">
+        <h2>竞争力规划特性（落地）</h2>
+        <span>按规划思路要交的能力与指标</span>
+      </div>
+      <div class="rbody">
+        <div class="block">
+          <div class="block-h"><div class="num">01</div><h3>跨端底座（先做中枢，再做端）</h3></div>
+          <div class="kpi">
+            <div class="kpi-item">
+              <div class="k">统一任务总线</div>
+              <div class="v">五端一致率 100%</div>
+              <div class="s">任一端打开同一 Task；列表延迟 &lt; 3s</div>
+            </div>
+            <div class="kpi-item">
+              <div class="k">本地 → 云端热迁移</div>
+              <div class="v">成功率 ≥ 95%</div>
+              <div class="s">含会话上下文 + dirty tree；丢失率 &lt; 5%</div>
+            </div>
+            <div class="kpi-item">
+              <div class="k">云端 → 本地 apply</div>
+              <div class="v">无冲突 ≥ 90%</div>
+              <div class="s">有冲突时 IDE 内可视化解决</div>
+            </div>
+            <div class="kpi-item">
+              <div class="k">Token 成本（底座）</div>
+              <div class="v">同比下降 ≥ 30%</div>
+              <div class="s">缓存 / 路由 / 压缩，不克扣能力</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="block">
+          <div class="block-h"><div class="num">02</div><h3>分端落地特性</h3></div>
+          <div class="feat ide">
+            <div class="feat-l">IDE<small>结对</small></div>
+            <div class="feat-r">
+              <div class="line">Next Edit + Agent 测试/lint 闭环；Local/Cloud 切换；检查点回滚</div>
+              <div class="metric">带验证闭环的一次提交可用率 ≥ 80%</div>
+            </div>
+          </div>
+          <div class="feat cli" style="margin-top:6px">
+            <div class="feat-l">CLI<small>引擎</small></div>
+            <div class="feat-r">
+              <div class="line">cloud exec / apply；非交互进 CI；Skills/MCP/Hooks；沙箱 + 预算 + 审计</div>
+              <div class="metric">核心仓 CI 可脚本化覆盖 100%；CLI 作为能力头等实现</div>
+            </div>
+          </div>
+          <div class="feat space" style="margin-top:6px">
+            <div class="feat-l">Space<small>工作台</small></div>
+            <div class="feat-r">
+              <div class="line">专家团 + 项目空间 + CU/BU + DeepResearch；技能市场；Space→Web 开发出口</div>
+              <div class="metric">非研发角色任务闭环（可验收产物）；不做成第二套 IDE</div>
+            </div>
+          </div>
+          <div class="feat web" style="margin-top:6px">
+            <div class="feat-l">Web<small>云+仓</small></div>
+            <div class="feat-r">
+              <div class="line">预热沙箱长程执行；Repo+PR+Agent 同屏；仓库事件 Automations；产物验收</div>
+              <div class="metric">预热后沙箱秒/分钟级就绪；云端开 PR 且流水线通过可运营</div>
+            </div>
+          </div>
+          <div class="feat mob" style="margin-top:6px">
+            <div class="feat-l">Mobile<small>驾驭</small></div>
+            <div class="feat-r">
+              <div class="line">任务雷达；遥控 Space/开发机；云端派发；高危操作推送审批；轻量看 diff</div>
+              <div class="metric">审批推送到完成 &lt; 1 min；电脑离线仍可派发云端任务</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note">
+          对标：Cursor Origin / Cloud Agents（含 Move to Cloud）、Codex cloud exec+apply、Claude Code Remote Control、Qoder Quest/--remote、WorkBuddy 微信遥控与专家/项目空间。码道差异：任务中枢 + 带着现场上云 + CodeArts Repo 原生 Agent 化 + 微信/鸿蒙双驾驭入口。
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
