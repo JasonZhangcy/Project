@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 """生成《Agent Team 竞争力构建规划》OBP 单页 PPT。
-左侧:分层规划架构图;右侧:竞争力特性规划表。
+左侧:逻辑流程架构图(入口→路由→单Agent/Team→固化回流);右侧:竞争力特性规划表。
 """
 from pptx import Presentation
-from pptx.util import Inches, Pt, Emu
+from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
-from pptx.enum.shapes import MSO_SHAPE
+from pptx.enum.shapes import MSO_SHAPE, MSO_CONNECTOR
 from pptx.oxml.ns import qn
 
 # ---------- 配色 ----------
 HW_RED = RGBColor(0xC7, 0x00, 0x0B)        # 华为红(强调色)
-DARK = RGBColor(0x1F, 0x2A, 0x3A)          # 深灰蓝(正文/标题)
-GRAY = RGBColor(0x5A, 0x64, 0x72)          # 次要文字
-L1 = RGBColor(0x2C, 0x5F, 0x9E)            # 体验层
-L2 = RGBColor(0xC7, 0x00, 0x0B)            # 调度层(差异化主打,用红色)
-L3 = RGBColor(0x1F, 0x7A, 0x6D)            # 编排层
-L4 = RGBColor(0x4A, 0x55, 0x68)            # 底座
-ENTRY = RGBColor(0x8A, 0x2B, 0xE2) if False else RGBColor(0x6B, 0x4F, 0xA0)  # 入口
-SUB_FILL = RGBColor(0xFF, 0xFF, 0xFF)
+DARK = RGBColor(0x1F, 0x2A, 0x3A)
+GRAY = RGBColor(0x5A, 0x64, 0x72)
+BLUE = RGBColor(0x2C, 0x5F, 0x9E)          # 专家资产
+GREEN = RGBColor(0x1F, 0x7A, 0x6D)         # 编排/Team
+BASE = RGBColor(0x4A, 0x55, 0x68)          # 底座
+PURPLE = RGBColor(0x6B, 0x4F, 0xA0)        # 入口
+WHITE = RGBColor(0xFF, 0xFF, 0xFF)
+LIGHT_GREEN = RGBColor(0xEE, 0xF6, 0xF4)
 TBL_HDR = RGBColor(0x1F, 0x2A, 0x3A)
 TBL_ROW_A = RGBColor(0xF5, 0xF7, 0xFA)
 TBL_ROW_B = RGBColor(0xEA, 0xEE, 0xF4)
@@ -27,7 +27,7 @@ FONT = "微软雅黑"
 prs = Presentation()
 prs.slide_width = Inches(13.333)
 prs.slide_height = Inches(7.5)
-slide = prs.slides.add_slide(prs.slide_layouts[6])  # blank
+slide = prs.slides.add_slide(prs.slide_layouts[6])
 
 
 def set_font(run, size, color=DARK, bold=False, name=FONT):
@@ -36,7 +36,6 @@ def set_font(run, size, color=DARK, bold=False, name=FONT):
     f.bold = bold
     f.color.rgb = color
     f.name = name
-    # 东亚字体需单独设置
     rPr = run._r.get_or_add_rPr()
     ea = rPr.find(qn('a:ea'))
     if ea is None:
@@ -46,12 +45,11 @@ def set_font(run, size, color=DARK, bold=False, name=FONT):
 
 
 def add_text(shape, lines, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE):
-    """lines: list of (text, size, color, bold)"""
     tf = shape.text_frame
     tf.word_wrap = True
     tf.vertical_anchor = anchor
-    tf.margin_left = tf.margin_right = Pt(4)
-    tf.margin_top = tf.margin_bottom = Pt(2)
+    tf.margin_left = tf.margin_right = Pt(2)
+    tf.margin_top = tf.margin_bottom = Pt(1)
     for i, (text, size, color, bold) in enumerate(lines):
         p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
         p.alignment = align
@@ -61,106 +59,137 @@ def add_text(shape, lines, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE):
     return shape
 
 
-def box(x, y, w, h, fill, line=None, shape_type=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.08):
-    sp = slide.shapes.add_shape(shape_type, x, y, w, h)
+def box(x, y, w, h, fill, line=None, shape_type=MSO_SHAPE.ROUNDED_RECTANGLE,
+        radius=0.12, line_w=1.0):
+    sp = slide.shapes.add_shape(shape_type, Inches(x), Inches(y), Inches(w), Inches(h))
     if shape_type == MSO_SHAPE.ROUNDED_RECTANGLE:
         try:
             sp.adjustments[0] = radius
         except Exception:
             pass
-    sp.fill.solid()
-    sp.fill.fore_color.rgb = fill
+    if fill is None:
+        sp.fill.background()
+    else:
+        sp.fill.solid()
+        sp.fill.fore_color.rgb = fill
     if line is None:
         sp.line.fill.background()
     else:
         sp.line.color.rgb = line
-        sp.line.width = Pt(1)
+        sp.line.width = Pt(line_w)
     sp.shadow.inherit = False
     return sp
+
+
+def arrow(x1, y1, x2, y2, color=GRAY, dashed=False, width=1.5,
+          head=False, tail=True):
+    """带箭头连接线。tail=终点箭头,head=起点箭头。"""
+    conn = slide.shapes.add_connector(MSO_CONNECTOR.STRAIGHT,
+                                      Inches(x1), Inches(y1), Inches(x2), Inches(y2))
+    conn.line.color.rgb = color
+    conn.line.width = Pt(width)
+    conn.shadow.inherit = False
+    ln = conn.line._get_or_add_ln()
+    if dashed:
+        d = ln.makeelement(qn('a:prstDash'), {'val': 'dash'})
+        ln.append(d)
+    if head:
+        he = ln.makeelement(qn('a:headEnd'), {'type': 'triangle', 'w': 'med', 'len': 'med'})
+        ln.append(he)
+    if tail:
+        te = ln.makeelement(qn('a:tailEnd'), {'type': 'triangle', 'w': 'med', 'len': 'med'})
+        ln.append(te)
+    return conn
+
+
+def label(x, y, w, text, size=8.5, color=GRAY, bold=False, align=PP_ALIGN.CENTER):
+    tb = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(0.25))
+    add_text(tb, [(text, size, color, bold)], align=align)
+    return tb
 
 
 # ================= 标题区 =================
 title = slide.shapes.add_textbox(Inches(0.35), Inches(0.14), Inches(12.6), Inches(0.55))
 add_text(title, [("Agent Team 竞争力构建规划:从单 Agent 到企业级数字团队", 26, DARK, True)],
          align=PP_ALIGN.LEFT)
-
 subtitle = slide.shapes.add_textbox(Inches(0.38), Inches(0.66), Inches(12.6), Inches(0.34))
 add_text(subtitle, [("统一入口 · 自动路由 · 自主编排 · 专家资产化 —— 三层递进能力 + 企业级治理底座,构筑差异化竞争力", 12.5, GRAY, False)],
          align=PP_ALIGN.LEFT)
+box(0.38, 0.60, 1.6, 3.0 / 72, HW_RED, shape_type=MSO_SHAPE.RECTANGLE)
 
-# 标题下红色装饰线
-bar = box(Inches(0.38), Inches(0.60), Inches(1.6), Pt(3), HW_RED,
-          shape_type=MSO_SHAPE.RECTANGLE)
-
-TOP = 1.12          # 内容区起始
+TOP = 1.12
 LEFT_X = 0.35
 LEFT_W = 5.95
 
-# ================= 左侧:规划构建架构图 =================
+# ================= 左侧:逻辑流程架构图 =================
 sec1 = slide.shapes.add_textbox(Inches(LEFT_X), Inches(TOP - 0.04), Inches(LEFT_W), Inches(0.3))
 add_text(sec1, [("规划构建架构", 15, HW_RED, True)], align=PP_ALIGN.LEFT)
 
-ARCH_TOP = TOP + 0.32
-LABEL_W = 0.92      # 左侧层名标签宽
-GAP = 0.07
-BODY_X = LEFT_X + LABEL_W + 0.08
-BODY_W = LEFT_W - LABEL_W - 0.08
+# --- 第1行:用户 → 统一任务入口 ---
+user = box(0.50, 1.50, 0.52, 0.48, DARK, shape_type=MSO_SHAPE.OVAL)
+add_text(user, [("用户", 9.5, WHITE, True)])
+entry = box(2.00, 1.50, 2.70, 0.48, PURPLE)
+add_text(entry, [("统一任务入口", 11.5, WHITE, True), ("自然语言描述,免选执行模式", 8, WHITE, False)])
+arrow(1.02, 1.74, 2.00, 1.74, color=DARK)
 
-def layer(y, h, label, color, title_text, items, item_rows=1):
-    # 层标签(纵向)
-    lab = box(Inches(LEFT_X), Inches(y), Inches(LABEL_W), Inches(h), color)
-    add_text(lab, [(label, 11.5, RGBColor(0xFF, 0xFF, 0xFF), True)])
-    # 层主体
-    body = box(Inches(BODY_X), Inches(y), Inches(BODY_W), Inches(h),
-               RGBColor(0xF2, 0xF5, 0xF9), line=color)
-    # 层标题
-    t = slide.shapes.add_textbox(Inches(BODY_X + 0.08), Inches(y + 0.02),
-                                 Inches(BODY_W - 0.16), Inches(0.26))
-    add_text(t, [(title_text, 11, color, True)], align=PP_ALIGN.LEFT)
-    # 子项小方块
-    n = len(items)
-    cols = (n + item_rows - 1) // item_rows
-    iw = (BODY_W - 0.16 - (cols - 1) * 0.06) / cols
-    ih = (h - 0.34 - (item_rows - 1) * 0.05) / item_rows
-    for idx, it in enumerate(items):
-        r, c = divmod(idx, cols)
-        ix = BODY_X + 0.08 + c * (iw + 0.06)
-        iy = y + 0.30 + r * (ih + 0.05)
-        sp = box(Inches(ix), Inches(iy), Inches(iw), Inches(ih), SUB_FILL, line=color, radius=0.16)
-        add_text(sp, [(it, 9.5, DARK, False)])
+# --- 第2行:路由决策菱形 ---
+dia = box(2.45, 2.18, 1.80, 0.88, HW_RED, shape_type=MSO_SHAPE.DIAMOND)
+add_text(dia, [("复杂度评估", 10, WHITE, True), ("自动路由", 10, WHITE, True)])
+arrow(3.35, 1.98, 3.35, 2.18, color=DARK)
 
+# --- 第3行:分支 ---
+# 左分支:单 Agent
+arrow(2.45, 2.62, 1.25, 3.30, color=GRAY)
+label(0.82, 2.66, 1.0, "简单任务", 8.5, GRAY)
+single = box(0.55, 3.30, 1.30, 0.60, BASE)
+add_text(single, [("单 Agent", 10.5, WHITE, True), ("直接执行", 8.5, WHITE, False)])
 
-y = ARCH_TOP
-# 统一任务入口
-entry = box(Inches(BODY_X), Inches(y), Inches(BODY_W), Inches(0.44), ENTRY)
-add_text(entry, [("统一任务入口:自然语言描述任务,免选单 Agent / Agent Team", 11.5, RGBColor(0xFF, 0xFF, 0xFF), True)])
-lab0 = box(Inches(LEFT_X), Inches(y), Inches(LABEL_W), Inches(0.44), ENTRY)
-add_text(lab0, [("入口", 11.5, RGBColor(0xFF, 0xFF, 0xFF), True)])
-y += 0.44 + GAP
+# 右分支:Agent Team 容器
+arrow(4.25, 2.62, 4.42, 3.20, color=GRAY)
+label(4.42, 2.60, 1.0, "复杂任务", 8.5, GRAY)
+team = box(2.60, 3.20, 3.62, 1.85, LIGHT_GREEN, line=GREEN, line_w=1.2)
+label(2.72, 3.26, 2.4, "Agent Team · 自主编排", 9.5, GREEN, True, align=PP_ALIGN.LEFT)
+lead = box(3.66, 3.52, 1.50, 0.45, GREEN)
+add_text(lead, [("Team Lead:递归拆解·组队", 8.5, WHITE, True)])
+tm_xs = [2.78, 3.93, 5.08]
+tm_names = ["开发专家", "测试专家", "安全专家"]
+for tx, tn in zip(tm_xs, tm_names):
+    t = box(tx, 4.22, 1.02, 0.42, WHITE, line=GREEN)
+    add_text(t, [(tn, 9, DARK, False)])
+    arrow(4.41, 3.97, tx + 0.51, 4.22, color=GREEN, width=1.2)
+label(2.70, 4.72, 3.4, "共享任务列表 · Teammate 间消息协同", 8, GRAY)
 
-# 体验层
-layer(y, 1.02, "体验层", L1, "专家 / 专家团(降低使用门槛,资产化运营)",
-      ["预置领域\n专家库", "场景化专家\n团模板", "企业专家\n工厂", "专家/技能\n市场"])
-y += 1.02 + GAP
+# 单 Agent ↔ Team 动态升降级(双向虚线)
+arrow(1.85, 3.60, 2.60, 3.60, color=HW_RED, dashed=True, head=True, tail=True, width=1.5)
+label(1.48, 3.10, 1.6, "动态升降级", 8.5, HW_RED, True)
 
-# 调度层
-layer(y, 1.02, "调度层", L2, "复杂度自适应路由(差异化主打:业界尚无显式产品化)",
-      ["任务复杂度\n评估器", "三档执行\n模式决策", "运行中动态\n升降级", "成本-质量\n策略路由"])
-y += 1.02 + GAP
+# --- 第4行:资产与交付 ---
+expert = box(0.55, 5.45, 1.50, 0.72, BLUE, shape_type=MSO_SHAPE.CAN)
+add_text(expert, [("专家/技能", 9, WHITE, True), ("资产库", 9, WHITE, True)])
+deliver = box(2.70, 5.50, 1.40, 0.62, WHITE, line=DARK)
+add_text(deliver, [("统一交付", 10, DARK, True), ("结果可审计", 8.5, GRAY, False)])
+blueprint = box(4.72, 5.45, 1.50, 0.72, GREEN, shape_type=MSO_SHAPE.CAN)
+add_text(blueprint, [("团队蓝图库", 9, WHITE, True), ("(版本化)", 8.5, WHITE, False)])
 
-# 编排层
-layer(y, 1.02, "编排层", L3, "自主编排与固化(确定性、可复用)",
-      ["递归Planner\n任务拆解", "Teammate\n动态合成", "团队蓝图\n固化", "例行化\n定时/事件触发"])
-y += 1.02 + GAP
+# 交付箭头
+arrow(1.20, 3.90, 2.80, 5.50, color=GRAY)                    # 单Agent → 交付
+arrow(3.85, 5.05, 3.55, 5.50, color=GREEN)                   # Team → 交付
+# 专家库 → Team(虚线:实例化组队)
+arrow(1.55, 5.45, 2.95, 5.05, color=BLUE, dashed=True)
+label(1.10, 5.12, 1.7, "专家实例化组队", 8, BLUE)
+# Team → 蓝图库(虚线:固化)
+arrow(5.05, 5.05, 5.35, 5.45, color=GREEN, dashed=True)
+label(5.12, 5.12, 1.2, "执行后固化", 8, GREEN)
+# 蓝图库 → 入口(虚线回流,沿右缘)
+arrow(6.24, 5.60, 6.24, 1.74, color=GREEN, dashed=True, tail=False)
+arrow(6.24, 1.74, 4.72, 1.74, color=GREEN, dashed=True)
+label(4.62, 2.02, 1.75, "蓝图复用·例行触发", 8, GREEN)
 
-# 底座
-layer(y, 1.02, "底座", L4, "企业级治理控制面(政企商用落地前提)",
-      ["权限与\n审计", "成本配额\n管控", "效果度量\nROI 看板", "共享记忆\n上下文空间"])
-y += 1.02
-
-# 架构原则注脚
-note = slide.shapes.add_textbox(Inches(LEFT_X), Inches(y + 0.05), Inches(LEFT_W), Inches(0.5))
-add_text(note, [("架构原则:写操作单线程 + 多 Agent 贡献智能(map-reduce-and-manage),规避并行写冲突与成本失控", 9.5, GRAY, False)],
+# --- 第5行:治理底座 ---
+base = box(0.55, 6.32, 5.69, 0.46, BASE)
+add_text(base, [("企业级治理底座:权限审计 · 成本配额 · 效果度量(ROI) · 共享记忆", 10, WHITE, True)])
+legend = slide.shapes.add_textbox(Inches(0.55), Inches(6.84), Inches(5.7), Inches(0.3))
+add_text(legend, [("实线 = 任务流    虚线 = 资产/反馈流    架构原则:写操作单线程 + 多 Agent 贡献智能", 8.5, GRAY, False)],
          align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.TOP)
 
 # ================= 右侧:竞争力特性规划表 =================
@@ -195,7 +224,6 @@ table.rows[0].height = Inches(0.40)
 for i in range(1, len(rows_data) + 1):
     table.rows[i].height = Inches((tbl_h - 0.40) / len(rows_data))
 
-# 表头
 hdr = ["关键竞争力", "竞争力描述"]
 for c in range(2):
     cell = table.cell(0, c)
@@ -205,11 +233,10 @@ for c in range(2):
     p = cell.text_frame.paragraphs[0]
     p.alignment = PP_ALIGN.CENTER
     r = p.add_run(); r.text = hdr[c]
-    set_font(r, 13, RGBColor(0xFF, 0xFF, 0xFF), True)
+    set_font(r, 13, WHITE, True)
 
 for i, (k, v) in enumerate(rows_data, start=1):
     fill = TBL_ROW_A if i % 2 == 1 else TBL_ROW_B
-    # 第一列
     c0 = table.cell(i, 0)
     c0.fill.solid(); c0.fill.fore_color.rgb = fill
     c0.vertical_anchor = MSO_ANCHOR.MIDDLE
@@ -219,7 +246,6 @@ for i, (k, v) in enumerate(rows_data, start=1):
     r = p.add_run(); r.text = k
     accent = HW_RED if "路由" in k else DARK
     set_font(r, 11, accent, True)
-    # 第二列
     c1 = table.cell(i, 1)
     c1.fill.solid(); c1.fill.fore_color.rgb = fill
     c1.vertical_anchor = MSO_ANCHOR.MIDDLE
@@ -230,7 +256,6 @@ for i, (k, v) in enumerate(rows_data, start=1):
     r = p.add_run(); r.text = v
     set_font(r, 10, DARK, False)
 
-# 右侧注脚:对标信息
 foot = slide.shapes.add_textbox(Inches(RIGHT_X), Inches(tbl_top + tbl_h + 0.05), Inches(RIGHT_W), Inches(0.5))
 add_text(foot, [("对标:Claude Code Agent Teams / Cursor 递归编排 / Devin Managed Devins / Grok Bot / WorkBuddy 专家团 / GitHub Agent HQ", 9, GRAY, False)],
          align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.TOP)
