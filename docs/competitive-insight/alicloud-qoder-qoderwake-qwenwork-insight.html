@@ -1,0 +1,763 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><title>阿里云 Qoder / QoderWake / 千问办公 多人多 Agent 协同洞察</title><style>
+body{font-family:"Microsoft YaHei","Noto Sans CJK SC","WenQuanYi Micro Hei",sans-serif;font-size:10.5pt;line-height:1.55;color:#222;max-width:1000px;margin:24px auto;padding:0 20px}
+h1{font-size:20pt;color:#C00000;border-bottom:3px solid #E37B00;padding-bottom:6px}
+h2{font-size:15pt;color:#B45500;border-left:6px solid #E37B00;padding-left:8px;margin-top:28px}
+h3{font-size:12pt;color:#1F2A44;margin-top:18px}
+table{border-collapse:collapse;width:100%;margin:10px 0;font-size:9.5pt}
+th{background:#FFD966;border:1px solid #E3A400;padding:5px 7px;text-align:left}
+td{border:1px solid #E3C77A;padding:5px 7px;vertical-align:top}
+tr:nth-child(even) td{background:#FFF7E6}
+blockquote{border-left:4px solid #3D9BE9;background:#E4F1FB;padding:6px 12px;margin:10px 0;color:#004C82}
+code{background:#f3f3f3;padding:1px 4px;border-radius:3px;font-size:9.5pt}
+a{color:#006EB8;word-break:break-all}
+hr{border:0;border-top:1px solid #ddd;margin:20px 0}
+</style></head><body><h1 id="qoder-qoderwake-agent">阿里云 Qoder / QoderWake / 千问办公：多人多 Agent 协同与项目能力洞察（信息收集 + 分析稿）</h1>
+<blockquote>
+<p>用途：为华为云码道 CodeArts 竞争洞察一页 PPT 做前置的信息收集与分析。
+信息截止：2026-09-26（云栖大会 2026 于 9 月 22–24 日在杭州举办，主题"智以致用"）。
+说明：本文所有事实性描述均标注来源编号，见文末"参考资料"。带【推断】标记的内容为基于公开信息的分析判断，非官方表述。</p>
+</blockquote>
+<hr />
+<h2 id="0">0. 一句话结论</h2>
+<p>阿里在云栖 2026 上，把"多人多 Agent 协同"同时落到了三个入口：<strong>Qoder（研发协同：项目 + 讨论 + Agent Team）</strong>、<strong>QoderWake（组织协同：常驻 IM 的数字员工团队 + 多层记忆 + 自进化）</strong>、<strong>千问办公（业务协同：企业上下文 + 协作空间 + 数字员工身份）</strong>。三者共用 Qoder Agent Harness / 千问模型 / 阿里云 Agentic Cloud 底座，其共同战略意图是：<strong>把 Agent 从"个人桌面工具"升级为"组织成员"，让 Agent 成为云上 7×24 常驻的"居民"，持续消耗算力、存储、网络与 Token</strong>，并借此完成"从运营算力到运营智力"的商业模式切换。</p>
+<hr />
+<h2 id="1-2026">1. 背景：云栖大会 2026 的顶层叙事（理解三款产品的钥匙）</h2>
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>发言人</th>
+<th>核心观点</th>
+<th>与本洞察的关系</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>集团战略</td>
+<td>吴泳铭（阿里 CEO）</td>
+<td>进入"机器智能时代"，机器思考总量将达人类 1000 倍；三大基石 = AI 模型、AI 芯片、AI 云；"Agent 需要长时间执行任务……都会成为云上的'居民'，持续调用算力"；目标 2032 年阿里云全球数据中心超 20GW [R1][R2]</td>
+<td>Agent 常驻 = 云资源持续消耗，是 QoderWake 云端化、Cloud Agents 的根本商业动机</td>
+</tr>
+<tr>
+<td>云架构</td>
+<td>李飞飞（阿里云 CTO）</td>
+<td>提出 <strong>Agentic Cloud</strong>，围绕 Model / Harness / Context 三个场景重构云；发布 AgentCore（Agent 构建治理平台）、Agent Sandbox（创建吞吐 10 万/分钟，深休眠唤醒 &lt;600ms，兼容 E2B/K8s）、Agentic OS（省 Token 30%、沙箱密度 3 倍）、<strong>Agentic Computer（为智能体提供长期在线的专属云电脑工位）</strong>；"云的价值从规模化运营算力转向规模化运营智力"，AI SaaS 或走向按结果付费 [R3][R4][R5]</td>
+<td>QoderWake 的"员工与工位分离"、千问办公的"企业上下文"、Qoder 的 Cloud Agents 分别对应 Harness / Context / Model 三条线</td>
+</tr>
+<tr>
+<td>算力</td>
+<td>高慧（平头哥）</td>
+<td>Agent 执行时短时间高频调用模型，对计算、网络、存储协同要求极高，走向"算网存协同" [R4]</td>
+<td>多 Agent 并发 = 通算（CPU/存储/网络）与智算同步增长</td>
+</tr>
+</tbody>
+</table>
+<p>【推断】阿里的产品叙事已经从"AI Coding 工具"转到"组织级 Agent 基础设施"。吴泳铭甚至把"今天的 AI Coding"类比为"电气时代早期的电灯"[R2]，暗示编程 Agent 只是入口，真正的增量在其后的 Agent 常驻工作负载。</p>
+<hr />
+<h2 id="2-qoder-ai-ide">2. Qoder：从 AI IDE 到"以编程智能体为核心引擎的智能体平台"</h2>
+<h3 id="21">2.1 产品概况</h3>
+<ul>
+<li>2025 年 8 月 Qoder IDE 首发；2026 年 8 月底"全新 Qoder"发布，定位"面向所有人、以编程智能体为核心引擎的智能体平台"；全球用户超 600 万、服务超 10 万家企业 [Q1][Q2]。</li>
+<li>七大产品形态：Qoder 桌面端、Qoder IDE、Qoder CLI、JetBrains 插件、移动端（远程控制）、<strong>QoderWake 数字员工</strong>、<strong>Qoder Cloud Agents 云端智能体</strong>，各终端任务状态互通 [Q2]。</li>
+<li>底座：Agent Harness（规划-执行-验证-纠错循环、分级权限、工具白名单）；Auto 多模型调度（Qwen3.8-Max 等）；40+ 连接器、70+ 插件、2 万+ 技能；Plan / Goal / 侧边任务三大长任务机制 [Q1][Q2]。</li>
+<li>工作范式主张："工作的对象从代码工程变为智能体任务，工作的姿势从亲手生产变为委派与验收" [Q1]。</li>
+</ul>
+<h3 id="22-projects2026-09-23">2.2 "项目（Projects）"功能（2026-09-23 云栖发布，企业版内测）</h3>
+<p>来源：Qoder CN 更新日志 [Q1]、官方文档"项目" [Q3]、媒体报道 [Q5]</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>能力细节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>定位</td>
+<td>组织需要多人协作的研发工作（新功能、缺陷修复、技术改造），"与 Agent 在同一空间讨论方案、推进任务"</td>
+</tr>
+<tr>
+<td>结构</td>
+<td>项目 → Issue（待办）→ 看板；Issue 含标题、目标/背景/完成条件、优先级、状态</td>
+</tr>
+<tr>
+<td>状态机</td>
+<td>待规划 / 待开始 / 进行中 / 待验收 / 已完成 / 已取消</td>
+</tr>
+<tr>
+<td>与代码关联</td>
+<td>项目可填 Repo URL（可留空后补）；"代码仓库还未确定也可以先创建项目"</td>
+</tr>
+<tr>
+<td>Agent 参与</td>
+<td>可"使用 Agent 创建"项目；从 Issue 一键"发起讨论"并选择成员或 Agent；讨论结论需<strong>手动</strong>记录回 Issue</td>
+</tr>
+<tr>
+<td>成员管理</td>
+<td>仅支持<strong>链接邀请</strong>，不能从企业通讯录直接添加（现阶段限制）</td>
+</tr>
+<tr>
+<td>开放范围</td>
+<td>内测，率先向 Teams / Enterprise 订阅用户开放 [Q5]</td>
+</tr>
+</tbody>
+</table>
+<h3 id="23-discussion">2.3 "讨论（Discussion）"功能（同日发布）</h3>
+<p>来源：官方文档"讨论" [Q4]、媒体 [Q5]</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>能力细节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>定位</td>
+<td>与同事和专业 Agent 讨论需求、评审方案、分析缺陷，并记录结论和后续安排</td>
+</tr>
+<tr>
+<td>交互</td>
+<td>添加设计文档/截图等上下文附件；引用回复；<code>@</code> 成员或 Agent；"关键消息"标记（结论集中查看、定位原消息）；消息搜索、固定到侧栏</td>
+</tr>
+<tr>
+<td>Agent 参与</td>
+<td>通过"分享 &gt; 添加 Agent / Agent Team"把自定义 Agent 或 Agent Team 加入讨论；<code>@Agent</code> 请其分析材料、比较方案、补充测试思路；可"查看执行对话"审查 Agent 执行记录</td>
+</tr>
+<tr>
+<td>关键限制</td>
+<td><strong>只有 Agent 的拥有者可以 <code>@</code> 它</strong>；不能调用其他成员的 Agent；Agent 执行在拥有者当前设备上，需设备在线 [Q4][Q6]</td>
+</tr>
+<tr>
+<td>典型场景（官方示例）</td>
+<td>"支付幂等方案评审"：后端介绍现有实现、测试补充异常场景、Agent 比较候选方案、"本次只分析，不修改代码"</td>
+</tr>
+</tbody>
+</table>
+<h3 id="24-agent-team">2.4 自定义智能体 &amp; 智能体团队（Agent Team）</h3>
+<ul>
+<li><strong>自定义智能体</strong>：为代码审查、方案规划等固定工作保存指令、模型、权限、Skills/MCP/Plugins、工具白/黑名单；开启"允许在 Issue 和讨论中使用"后可被 <code>@</code> [Q6]。</li>
+<li><strong>自定义智能体团队</strong>：指定 1 名负责人 + 1–4 名成员；"协作指令"定义分工与要求；负责人拆解、协调、汇总，交由人审阅；团队任务通过当前设备执行 [Q7]。</li>
+<li><strong>CLI Agent Teams</strong>：main Agent 动态创建 teammate（researcher / coder / reviewer），SendMessage 协调，shared Task list 记录 owner/状态/依赖；建议 2–4 成员 [Q8]。</li>
+<li><strong>Cloud Agents Multiagent 编排</strong>：Coordinator 委派子 Agent（各自独立 Session Thread）+ Advisor（只给建议不执行工具）[Q9]。</li>
+</ul>
+<p>【观察】Qoder 的多 Agent 编排有三套并行实现（桌面 Agent Team / CLI Agent Teams / Cloud Multiagent），说明产品仍在快速迭代期，尚未统一。</p>
+<h3 id="25">2.5 云端能力与商业化</h3>
+<ul>
+<li><strong>云端自动化</strong>（9/23）："有可用云环境的账号，可通过对话或配置创建定时任务，在桌面端查看执行记录、继续追问" [Q1]。</li>
+<li><strong>Qoder Cloud Agents 1.0</strong>（9/17）："Agent as a Service"，一站式云端 Harness 托管；Forward Mode（企业/模板/用户三级配置、内建钉钉/飞书/微信/企微 IM 渠道、Schedules、终端用户 Identity）与 Managed Mode（原子 API：Agent / Environment / Session / Event，组织级 Environment、Skill、Vault、File、<strong>Memory Store</strong>）[Q10][Q11]；Environment 支持 <code>cloud</code>（托管容器，Ubuntu 22.04，<code>/data</code> 工作区）和 <code>self_hosted</code>（外部 worker 通过 Work API 拉取任务）[Q12][Q13]。</li>
+<li><strong>计费</strong>：Credits 制。模型调用按 Token 折算；<strong>云沙箱按 Session <code>running</code> 状态按秒计费、按小时结算</strong>，沙箱通常占单次 Session 总消耗 5%–10%（2026-08-10 起正式收费）；企业空间使用"服务账号专用资源包"（阿里云云市场购买）[Q14][Q15]。</li>
+<li>企业版内置云端知识库 QMind（跨设备、团队共享），ISO/IEC 27001:2022 认证 [Q2]。</li>
+</ul>
+<h3 id="26-skill-923">2.6 Skill 自进化建议（9/23）</h3>
+<p>会话完成后，从可复用经验中获得 Skill 创建/更新建议；采纳后进入独立会话，确认方案后再执行 [Q1]。—— 这是 QoderWake 自进化机制向 Qoder 桌面端的"下放"。</p>
+<h3 id="27">2.7 现阶段短板（对比时可用）</h3>
+<ol>
+<li>项目/讨论仍是"轻量 Issue 看板 + 群聊"，没有需求管理、迭代、里程碑、工时、代码评审、流水线等 DevOps 深度能力；结论回写 Issue 靠人工。</li>
+<li>成员邀请仅限链接，未接入企业组织架构；Agent 不可跨成员共享调用。</li>
+<li>Agent 执行依赖拥有者设备在线（桌面端），与云端执行尚未在协作场景打通。</li>
+<li>功能处于内测，仅企业版。</li>
+</ol>
+<h3 id="28-qoder">2.8 Qoder 的战略意图【推断】</h3>
+<table>
+<thead>
+<tr>
+<th>意图</th>
+<th>依据</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>把"个人 AI IDE"升级为"团队协作空间"，抢占研发协作入口</strong></td>
+<td>项目 + 讨论 + Agent Team 直接对标 Linear/Jira + Slack 的组合，但以 Agent 为一等公民；与 Cursor、Claude Code、TRAE 拉开差异</td>
+</tr>
+<tr>
+<td><strong>从座席订阅转向"座席 + 云沙箱 + Token"三重计费</strong></td>
+<td>Cloud Agents 沙箱按秒计费；企业专用资源包走阿里云云市场；云端自动化要求"有可用云环境"</td>
+</tr>
+<tr>
+<td><strong>用 Harness 统一底座复用到数字员工与云托管</strong></td>
+<td>Qoder / IDE / CLI / QoderWake / Cloud Agents 共享同一 Agent Harness，边际成本极低</td>
+</tr>
+<tr>
+<td><strong>让 Coding Agent 成为所有 Agent 的"母体"</strong></td>
+<td>官方口号 "Beyond Coding"；"拥有一个 Coding Agent，就等于拥有把想法变成现实的能力"</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-qoderwake-im724">3. QoderWake：常驻 IM、7×24 在岗、可进化的"数字员工团队"</h2>
+<h3 id="31">3.1 产品概况与时间线</h3>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>事件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-04-30</td>
+<td>发布并开放邀测；首个岗位"数字程序员"（变更简报、故障初诊、告警分诊、积压整理）[W1]</td>
+</tr>
+<tr>
+<td>2026-05-26</td>
+<td>v0.1 全球公测（macOS/Linux），预置 6 岗位，"5 分钟上岗"[W2]</td>
+</tr>
+<tr>
+<td>2026-06</td>
+<td>Windows 版；员工群组（Group）；钉钉知识库/文档/日程接入 [W2]</td>
+</tr>
+<tr>
+<td>2026-07</td>
+<td>WakerFlow 正式发布；任务看板；全局 IM 渠道与多目标路由 [W2]</td>
+</tr>
+<tr>
+<td>2026-08</td>
+<td>@Waker 正式发布；群聊答疑专员；长期记忆自动沉淀；连接器市场 [W2]</td>
+</tr>
+<tr>
+<td>2026-09-03/07</td>
+<td><strong>QoderWake 1.0 正式发布</strong>："从桌面里的 Agent 到工作现场的数字员工"，Mac/Windows/云主机 [W2][W3]</td>
+</tr>
+</tbody>
+</table>
+<p>关键数据（官方稿，截至 2026-09）：近 10 万个 Waker 被创建；累计执行约 2000 万次有效任务（注：另有媒体转载为"200 万次"[W5]，数量级存疑，引用时请注明）；<strong>接近半数任务由时间/事件自动触发</strong>；任务量呈工作日高、周末低的节律；累计沉淀 <strong>27.6 万条记忆、12.3 万项技能，其中 2.28 万项来自系统自进化</strong> [W3][W4]。</p>
+<h3 id="32-">3.2 数字员工的构成与"员工-工位分离"设计</h3>
+<ul>
+<li>五层构成：<strong>身份、记忆、技能、分工、权限红线</strong> [W1]。</li>
+<li>"雇主-员工关系"：起名字、定岗位、画红线；"换设备、换 LLM 引擎、换工位，他还是同一位员工"；人格档案是可 git 管理的纯文本；"订阅期过了，训练成果不会消失" [W1]。</li>
+<li><strong>员工与工位分离</strong>："员工保存身份、记忆、技能和权限；工位负责提供运行环境，可以是本地电脑，也可以是云端沙箱"；邀测期默认住在用户设备上，"代码上不上云、记忆放不放云端，由你决定" [W1]。</li>
+<li>权限：每个 Waker 内置权限中心，从工具调用、文件访问、内置能力、模型输出四个维度独立开关；管理员可配组织级权限；高危操作默认拦截、命中规则需人工授权 [W4]。</li>
+</ul>
+<h3 id="33-agent">3.3 多人多 Agent 协同能力</h3>
+<table>
+<thead>
+<tr>
+<th>能力</th>
+<th>细节</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Waker 群组（Group）</strong></td>
+<td>多个本机或<strong>远程</strong> Waker 加入同一群组，指定 Leader 接收任务、拆解、分派、汇总；每位成员独立配置模型和工作目录；"谁跑在哪台机器上不影响一起干活"；群技能 + 协作 SOP 明确分工（谁思考拆解、谁执行、谁验收、哪些场景转人工）；可切换协作模式（头脑风暴放宽 vs 生产交付严格）</td>
+<td>[W2][W3][W4]</td>
+</tr>
+<tr>
+<td><strong>人机混合团队</strong></td>
+<td>"N 名员工 × M 个数字员工"；同一业务群可加入多名不同职能 Waker，系统按消息内容、岗位职责自动分发</td>
+<td>[W4]</td>
+</tr>
+<tr>
+<td><strong>WakerFlow</strong></td>
+<td>自然语言生成多步骤、多 Waker 流程；手动/定时/事件/API 触发；节点级输入/思考/工具调用/输出可视；版本历史与回滚；可分享给其他团队复用</td>
+<td>[W2][W4]</td>
+</tr>
+<tr>
+<td><strong>专家求助机制</strong></td>
+<td>Waker 在缺信息或需专业判断时，按"专家标签"私聊真人专家，专家引用回复后结论回到原任务与群聊，并沉淀进记忆/知识库</td>
+<td>[W6][W7]</td>
+</tr>
+<tr>
+<td><strong>自主工作</strong></td>
+<td>定时 / 事件（工单、流水线完成、数据表变更）/ API 触发；统一任务看板（列表/泳道）</td>
+<td>[W2][W4]</td>
+</tr>
+<tr>
+<td><strong>研发场景示例</strong></td>
+<td>产品经理 Waker 出需求文档 → 开发 Waker 编码 + 单测 → 测试 Waker 生成用例校验 → 失败回传开发迭代 → 全部通过后人工验收；"QoderWake v1.0 本身就有部分功能由这套 Waker 群组参与开发"</td>
+<td>[W4]</td>
+</tr>
+</tbody>
+</table>
+<h3 id="34-im-qoderwake-qoder">3.4 结合 IM 的能力（这是 QoderWake 与 Qoder 的最大差异）</h3>
+<ul>
+<li>已打通钉钉、飞书、企业微信三大办公 IM，另支持个人微信、QQ 机器人多实例管理；原生读取组织架构、在线文档、多维表格、待办、日历；可操作钉钉文档、读取钉钉会议听记 [W2][W3][W4]。</li>
+<li><strong>@Waker 统一入口</strong>：群里只需一个机器人，后台按职责路由到多位 Waker；配对模式（按会话审批）与开放模式 [W2][W6]。</li>
+<li><strong>觉醒模式（Wake-up Mode）</strong>：开启后 @Waker 识别成员意图、路由任务、记录后续补充与执行结果，并在聊天内沉淀"话题"和"记忆" [W6]。</li>
+<li>常驻群聊上下文：持续接收群内全部消息，自动区分"任务补充 / 需求修改 / 全新任务"，自主决定承接、转交其他 Waker 或求助真人专家；一个群窗口多任务并行；多人同时发消息自动排队；执行中可插话中断并基于当前上下文继续 [W4]。</li>
+<li>白天在群里与人确认口径，夜间沿用白天确认的规则无人值守执行，第二天回群继续迭代——"同一个数字员工贯穿全天候" [W4]。</li>
+<li>群聊答疑专员"Q仔"：上线 5 个月服务 10 万内部员工、8.6 万次对话、日均 1500+ 条消息；知识库能答的直接答，不能答的找专家，确认后回群并更新知识库 [W4]。</li>
+</ul>
+<h3 id="35">3.5 项目能力</h3>
+<ul>
+<li><strong>公开项目 / 私有项目</strong>：公开项目是"多个 Waker 可复用的工作目录"，一个账号下所有 Waker 共享项目里的上下文与产物；私有项目仅当前 Waker 使用 [W2][W8]。</li>
+<li>项目来源支持本地目录或 Git 仓库地址；IM 渠道可绑定工作目录/项目；<strong>项目记忆</strong>（目录结构、项目约定、测试命令、稳定业务背景）作用于"选择了该项目或目录的任务" [W2][W9]。</li>
+<li>【观察】QoderWake 的"项目"是"工作目录 + 项目记忆"的概念，偏 Agent 执行上下文；Qoder 的"项目"是"Issue 看板 + 讨论"的概念，偏人类协作管理。两者尚未打通。</li>
+</ul>
+<h3 id="36">3.6 记忆体系：已具备多层级雏形，但缺"企业记忆"一层</h3>
+<p><strong>官方五种记忆范围</strong>（docs "记忆系统"）[W9]：</p>
+<table>
+<thead>
+<tr>
+<th>范围</th>
+<th>适合保存</th>
+<th>生效范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>个人记忆（Waker 级）</td>
+<td>Waker 的长期职责、输出偏好、通用规则</td>
+<td>该 Waker 后续任务</td>
+</tr>
+<tr>
+<td>项目记忆</td>
+<td>目录结构、项目约定、测试命令、稳定业务背景</td>
+<td>选择了该项目的任务</td>
+</tr>
+<tr>
+<td>群共享记忆</td>
+<td>群内所有成员都应复用的事实、约定、结论</td>
+<td>当前 @Waker 群聊</td>
+</tr>
+<tr>
+<td>成员记忆</td>
+<td>某位群成员的职责、偏好、协作习惯</td>
+<td>当前群聊中的该成员</td>
+</tr>
+<tr>
+<td>单聊记忆</td>
+<td>机器人与某成员单聊的长期上下文</td>
+<td>当前 @Waker 单聊</td>
+</tr>
+</tbody>
+</table>
+<p><strong>官方"四层上下文"叙事</strong>（1.0 发布稿）[W4]：岗位档案（职责/边界/红线）→ 现场协同上下文（IM 群讨论、附件、共识）→ 已确认记忆（每日自动复盘，只留经人确认的口径，区分公开共识与私人对话）→ 可复用技能（验证过的指标口径、答案、流程）。</p>
+<p><strong>记忆治理能力</strong>：整份 <code>MEMORY.md</code> 可编辑、版本管理与回滚、记忆时间线（按日期/来源筛选）、跨机器导出导入迁移、空闲轮次后台自动沉淀核心记忆、"同一规则只在最小必要范围保存"原则、Anti-Rot 淘汰过时记忆 [W2][W9]。</p>
+<p><strong>对"多层记忆演进"问题的判断</strong>【推断】：</p>
+<ol>
+<li>QoderWake 已经实现"个人（Waker）/ 项目 / 群 / 成员 / 单聊"五层，这本质上已经是<strong>个人记忆、项目记忆、群记忆</strong>三层 + 两个人际子层。</li>
+<li><strong>企业记忆这一层目前不在 QoderWake，而在千问办公的"企业上下文（Enterprise Context）"</strong>——它支持"公司层面 / 部门知识空间"分级、周期性刷新、专属压缩模型 [T2][T3]。同时 Qoder Cloud Agents Managed Mode 已有组织级 <strong>Memory Store</strong> 资源 [Q11]。</li>
+<li>因此阿里的多层记忆版图是"分布式的"：个人/项目/群 → QoderWake；企业 → 千问办公企业上下文 + Cloud Agents Memory Store。<strong>下一步极有可能是让 QoderWake 的 Waker 直接挂载企业上下文，形成个人-群-项目-企业四级贯通</strong>（束骏亮称企业上下文"像数据库一样，不属于任何一个 Agent 产品，而属于企业客户本身" [T6]，为这种挂载留了口子）。</li>
+<li>对码道的含义：研发场景天然有清晰的"个人 → 项目/代码库 → 团队/部门 → 企业（规范、架构资产、安全基线）"层级，比办公场景更容易做成结构化的多层记忆；这是码道可以先于对手做深的地方。</li>
+</ol>
+<h3 id="37">3.7 长期记忆 + 持续进化（成长轨迹、自进化）</h3>
+<p>来源：QoderWake 发布博客 [W1]、更新日志 [W2]、第三方解读 [W10]</p>
+<ul>
+<li><strong>Harness-First 架构</strong>：确定性编排器（Orchestrator）负责长时程流程，模型负责意图理解与推理，Brain-Hands-Session 解耦；Executor 即时验证 + 独立 Verifier 审查整体结果，失败触发 REWORK 且失败原因沉淀为知识；Session 作为唯一状态源，任一组件崩溃可幂等重建。</li>
+<li><strong>执行即经验</strong>："第 1 天是初始基线，第 90 天是深度适配个人和企业的专家级经验，时间积累成为产品能力的一部分"；知识引擎跨多次执行提炼隐含规律（例："支付模块变更必须保持事务结构"）。</li>
+<li><strong>Experience-to-Capability 三层</strong>：① 对话、工具调用、记忆召回、验证结果、用户纠正、重做等多维事件统一为<strong>结构化可学习信号</strong>；② 基于完整任务轨迹做<strong>归因</strong>，判断经验应沉淀为<strong>记忆 / 技能 / 策略 / 验证器 / 工作流</strong>五类；③ <strong>Anti-Rot Governance 防腐治理</strong>：监控、验证、降权、合并、撤回——过时记忆淘汰、冲突技能合并/降权、失效策略撤回。</li>
+<li><strong>产品化表现</strong>：Waker 主页"记忆成长时间线"（鱼骨图，每条记忆事件一个节点，含 Skill 生命周期治理节点）；"记忆与学习"入口管理自进化技能；Skill 市场支持上传时选择是否允许自进化、自进化冲突时 AB diff 手动处理；市场 Skill 只读保护 [W2]。</li>
+<li>数据：12.3 万项技能中 2.28 万项（约 18.5%）来自系统自进化 [W4]。</li>
+</ul>
+<p>【判断】QoderWake 是目前国内把"自进化"做成<strong>可视化、可治理、可回滚</strong>产品能力最完整的数字员工产品；其差异点不是"能学"，而是"防腐"（capability rot）叙事——承认 7×24 学习会越学越乱，并给出治理机制。这是码道做"持续进化"时应重点对标的设计。</p>
+<h3 id="38">3.8 云端战略：从"住在你电脑上"到"云端工位"</h3>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>状态</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>邀测期（4 月）</td>
+<td>默认本地运行；工位可为本地或云端沙箱</td>
+<td>[W1]</td>
+</tr>
+<tr>
+<td>公测-1.0</td>
+<td>支持部署到<strong>阿里云云电脑（带 GUI）、Linux ECS、计算巢一键部署</strong>；Web UI 默认 <code>127.0.0.1:19820</code>，推荐 SSH 隧道访问</td>
+<td>[W11][W12][W13]</td>
+</tr>
+<tr>
+<td>1.0 群组</td>
+<td>本机与<strong>远程</strong> Waker 同群协作；"远端"= 同账号可见的另一台设备，文件/凭据/进程留在该设备</td>
+<td>[W3][W8]</td>
+</tr>
+<tr>
+<td>云栖 2026</td>
+<td>阿里云发布 <strong>Agentic Computer</strong>："为智能体提供统一、长期在线的专属云电脑工位，兼容主流 Agent 框架，具备 Computer Use 和 GUI 操作能力"</td>
+<td>[R3]</td>
+</tr>
+</tbody>
+</table>
+<p>官方给出的"必须上云"四个理由 [W13]：① 7×24 运行，个人电脑关机就"下班"；② 稳定网络入口接收钉钉事件；③ 团队共享访问配置与会话；④ 计算巢一键部署省运维。</p>
+<p><strong>对通算资源带动的分析</strong>【推断，结合已公开的计费与架构信息】：</p>
+<table>
+<thead>
+<tr>
+<th>资源</th>
+<th>带动逻辑</th>
+<th>证据</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CPU / 内存（通算）</strong></td>
+<td>每个 Waker 是常驻 daemon，需要工位（ECS / 云电脑 / 沙箱）持续在线；群组多成员 = 多工位；Qoder Cloud Agents 沙箱按 Session 运行时长按秒计费</td>
+<td>计算巢部署 ECS [W12]；沙箱计费 [Q14]；Agent Sandbox 创建吞吐 10 万/分钟 [R3]</td>
+</tr>
+<tr>
+<td><strong>存储</strong></td>
+<td>记忆（MEMORY.md 版本历史）、知识库、任务轨迹与审计日志、产物文件、Session 事件流持久化、容器临时存储 24h 回收后需外部存储</td>
+<td>容器参考 [Q13]；27.6 万条记忆 [W4]；Cloud Agents Files/Memory Store [Q11]</td>
+</tr>
+<tr>
+<td><strong>网络</strong></td>
+<td>IM 长连接（钉钉/飞书事件）、SSE 事件流、远程 Waker 跨设备通信、MCP/连接器调用</td>
+<td>@Waker 长连接与自动重连 [W2]</td>
+</tr>
+<tr>
+<td><strong>智算 / Token</strong></td>
+<td>半数任务自动触发 = 无人时段也在消耗 Token；Qwen 系列模型折扣、错峰时段深度折扣引导长程任务在低谷期执行</td>
+<td>错峰活动 [W2]；Qwen 5 折 [Q2]</td>
+</tr>
+<tr>
+<td><strong>数据引力</strong></td>
+<td>记忆、技能、知识库、企业上下文一旦沉淀在阿里云上，迁移成本随时间递增（品玩对千问办公的同类判断 [T3]）</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>结论：<strong>QoderWake 云端化 = 把"人使用 AI 的间歇性负载"变成"Agent 常驻的持续性负载"</strong>，这与吴泳铭"Agent 是云上居民"[R1]、李飞飞"智能体负载短生命周期、瞬时弹性，需重构云架构"[R4] 完全一致。沙箱费用当前仅占 Session 消耗 5%–10%，但常驻工位（ECS/云电脑）是独立的 IaaS 收入，不在该比例内。</p>
+<h3 id="39-qoderwake">3.9 QoderWake 的战略意图【推断】</h3>
+<ol>
+<li><strong>抢占"组织协同入口"而非"个人生产力入口"</strong>：常驻钉钉/飞书/企微群，让 Agent 出现在工作真实发生的地方；@Waker 单一机器人 + 后台路由降低了组织采用门槛。</li>
+<li><strong>以"数字员工"叙事对标人力预算</strong>："没有人数上限的虚拟人力"，把 Agent 支出从 IT 预算转移到人力/业务预算。</li>
+<li><strong>用记忆与自进化构建时间壁垒</strong>："第 90 天专家级经验"、记忆可迁移但沉淀在平台 —— 用得越久越难换。</li>
+<li><strong>通过云端工位把 Agent 变成 IaaS 消耗单元</strong>：本地默认是获客手段，7×24 与团队共享是上云理由，计算巢/云电脑/Agentic Computer 是承接产品。</li>
+<li><strong>与 Qoder 共用 Harness 底座，把研发场景验证过的长时运行、状态持久化、失败恢复能力复用到全岗位数字员工</strong>（BT 财经的解读："做办公 Agent 最贵的部分原本是在真实代码仓库里被逼出来的能力" [W5]）。</li>
+</ol>
+<hr />
+<h2 id="4-qwenwork">4. 千问办公（QwenWork）：企业上下文 + 数字员工 + 协作空间</h2>
+<h3 id="41">4.1 产品概况</h3>
+<ul>
+<li>2026 年 7 月，阿里将 QoderWork、MuleRun、悟空三款 Agent 产品整合为"千问办公"，由钉钉 CEO 陈宇森统一负责；8 月 3 日公测 [T6][T7]。</li>
+<li>上线 30 天用户破 3000 万，企业用户占比超一半；30 天 120 个版本更新 [T8]。</li>
+<li>与钉钉关系：同一管理架构下"齐头并进、相互融合"；钉钉是数据底座与上下文底座，千问办公是泛化交互层；"最终可能变成一个产品，也可能两个产品各找生态位" [T5][T6][T7]。</li>
+<li>核心竞争力主张：阿里全栈（平头哥芯片 + 千问模型 + 阿里云）+ 钉钉/淘天的企业客户理解 [T9]。</li>
+</ul>
+<h3 id="42-2026-9-22-t1t2t3t4">4.2 云栖 2026 发布清单（9 月 22 日）[T1][T2][T3][T4]</h3>
+<table>
+<thead>
+<tr>
+<th>发布项</th>
+<th>一句话说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>企业上下文（Enterprise Context）</strong></td>
+<td>面向企业的上下文数据管理产品；把群聊、文档、会议、知识库、CRM/ERP（Salesforce、SAP）数据压缩、结构化，按任务实时供给 Agent；内置专属压缩模型，"极低 Token 成本"；随业务周期性刷新</td>
+</tr>
+<tr>
+<td><strong>数字员工</strong></td>
+<td>Agent 拥有名称、所属部门、负责人、岗位职责、授权范围、生命周期；可被识别、授权、停用；执行记录追溯到身份（"给 Agent 发工牌"）</td>
+</tr>
+<tr>
+<td><strong>协作（协作空间）</strong></td>
+<td>创建空间，关联群聊/文档/知识库信息，加入团队成员和数字员工；人与 Agent、Agent 与 Agent 可直接讨论、分工；产出与进度统一沉淀在空间</td>
+</tr>
+<tr>
+<td><strong>应用</strong></td>
+<td>企业/SaaS 厂商把业务系统以应用形式接入，保留原界面和数据，加入 Agent 能力；结果可修改并保存回业务系统</td>
+</tr>
+<tr>
+<td><strong>安全中心</strong></td>
+<td>统一管理数据访问、工具调用、任务执行；执行前沙箱划界、执行中审批拦截、异常后操作记录与恢复；最小权限、敏感信息识别、全程审计</td>
+</tr>
+<tr>
+<td><strong>Managed Agents（千问 AI 平台）</strong></td>
+<td>Agent 托管运行时：配置模型、指令、工具、MCP、运行环境、凭证；云端容器沙箱；Agent / Environment / Session / Event 四概念；SSE 事件流；企业自研 Agent 也可接入 [T10]</td>
+</tr>
+<tr>
+<td><strong>QwenNote A2</strong></td>
+<td>67g AI 录音硬件，"转后即焚"，把会议/拜访等线下信息变成"外部上下文"入口；1199 元</td>
+</tr>
+</tbody>
+</table>
+<h3 id="43-t2t3">4.3 企业上下文的技术与产品要点 [T2][T3]</h3>
+<ul>
+<li>问题定义：中大型企业内部数据平均约 150PB，最强模型上下文窗口约 100 万 Token，"一股脑塞进去，要么爆掉，要么浪费执行窗口"——<strong>核心是压缩</strong>。</li>
+<li><strong>按组织范围配置</strong>：管理员管理公司层面信息，部门负责人围绕团队建知识空间（如"门店运营知识空间"）。</li>
+<li><strong>周期性刷新</strong>：新决策、新规则、新进展重新处理，避免 Agent 沿用失效规则。</li>
+<li>技术参照：开源的个人上下文基础设施 <strong>MyContext</strong>——按对话节奏切分、整理人物/项目/事实/关系，冲突信息保留多版本并调整可信度。</li>
+<li>成本主张（束骏亮）："别人抽象企业上下文可能 10 天、100 万；我们可能 5000 元、3 天" [T2]。</li>
+<li>定位（束骏亮）："企业上下文是新时代的数据基建，像数据库一样，不属于任何一个 Agent 产品，而属于企业客户本身" [T6]。</li>
+</ul>
+<h3 id="44-agent">4.4 多人多 Agent 协同能力</h3>
+<ul>
+<li><strong>富立卡案例</strong>（仓储物流包装）：销售每天 300+ 询盘、跨 6 部门；配置<strong>查询 / 报价 / 合同</strong>三个数字员工，通过企业上下文共享当前业务信息，前序结果带入后续环节，"客户是谁、适用哪套规则、前一步确认了什么，都不能每到一个 Agent 手里再重新解释一次" [T3]。</li>
+<li><strong>协作空间</strong>：解决"项目资料和进度分散在不同群聊和文档中，团队成员需反复同步"的问题；协作从人-人扩展到人-Agent、Agent-Agent [T1][T2]。</li>
+<li>组织"三重障碍"框架（陈宇森）：<strong>不懂</strong>（无企业上下文）→ <strong>不敢</strong>（安全）→ <strong>不能</strong>（优秀个体经验无法复用为组织能力）[T2]。这与 QoderWake"经验到能力"、Qoder"Skill 自进化建议"是同一命题的不同侧面。</li>
+</ul>
+<h3 id="45">4.5 千问办公的战略意图【推断】</h3>
+<ol>
+<li><strong>把"企业上下文"做成独立的数据基础设施层</strong>，成为所有 Agent（含第三方）的必经之路——"Context is All You Need"，上下文即护城河 [T2][T7]。</li>
+<li><strong>以钉钉的 IM/组织架构为分发渠道</strong>，用"数字员工工牌"把 Agent 纳入企业组织与权限体系，解决大企业"安全、可控、可定制"的采购顾虑。</li>
+<li><strong>原子化嵌入而非替代</strong>：以机器人、弹窗、按钮形态嵌入既有 IM 和业务系统 [T9]，降低替换阻力，扩大触点。</li>
+<li><strong>硬件收集外部上下文</strong>：QwenNote 是"上下文增量收集入口"，未来还有眼镜等 [T2]。</li>
+<li><strong>对阿里云的带动</strong>：企业上下文的压缩/结构化处理、Managed Agents 云端沙箱、安全中心审计日志均为云上持续负载；"上下文一旦整理好，更换平台需重新处理的数据、集成和权限配置会增加"（品玩）[T3]。</li>
+</ol>
+<hr />
+<h2 id="5">5. 三款产品横向对比</h2>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Qoder（项目 + 讨论）</th>
+<th>QoderWake</th>
+<th>千问办公</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>目标用户</td>
+<td>研发团队（Teams/Enterprise）</td>
+<td>企业各岗位团队（研发起步，扩展到运营/销售/HR）</td>
+<td>全员办公 + 业务流程</td>
+</tr>
+<tr>
+<td>多人协同载体</td>
+<td>项目 / Issue / 看板 / 讨论（Qoder 内）</td>
+<td>IM 群聊（钉钉/飞书/企微）+ Console</td>
+<td>协作空间 + IM（钉钉）</td>
+</tr>
+<tr>
+<td>多 Agent 协同</td>
+<td>Agent Team（负责人 + 1–4 成员）；CLI Agent Teams；Cloud Multiagent</td>
+<td>Waker Group（Leader + 成员，跨设备）；WakerFlow；专家求助</td>
+<td>多个数字员工围绕同一业务流转（查询→报价→合同）；Agent 间沟通分工</td>
+</tr>
+<tr>
+<td>项目概念</td>
+<td>Issue 看板 + Repo URL，偏协作管理</td>
+<td>公开/私有项目 = 共享工作目录 + 项目记忆，偏执行上下文</td>
+<td>协作空间关联群聊/文档/知识库</td>
+</tr>
+<tr>
+<td>记忆层级</td>
+<td>跨会话项目/偏好记忆；企业 QMind 知识库；Cloud Memory Store</td>
+<td>个人 / 项目 / 群共享 / 成员 / 单聊 五层 + 版本回滚 + 时间线</td>
+<td>企业上下文（公司级 / 部门级知识空间，周期刷新）</td>
+</tr>
+<tr>
+<td>持续进化</td>
+<td>Skill 自进化建议</td>
+<td>记忆/技能/策略/验证器/工作流五类沉淀 + Anti-Rot 治理 + 成长时间线</td>
+<td>企业上下文随业务刷新（Agent 侧进化未强调）</td>
+</tr>
+<tr>
+<td>Agent 身份</td>
+<td>拥有者私有，不可跨成员 @</td>
+<td>Waker 有岗位、工号，群内共享</td>
+<td>数字员工有部门/负责人/生命周期，组织级身份</td>
+</tr>
+<tr>
+<td>云端形态</td>
+<td>云端自动化；Cloud Agents（沙箱按秒计费）</td>
+<td>云电脑 / ECS / 计算巢；远程 Waker；对应 Agentic Computer</td>
+<td>Managed Agents 云端沙箱</td>
+</tr>
+<tr>
+<td>成熟度</td>
+<td>内测（9/23）</td>
+<td>1.0 GA（9/7）</td>
+<td>公测 + 云栖企业级发布</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-ppt">6. 战略意图总览（对应 PPT 第二层"产品战略意图"）</h2>
+<table>
+<thead>
+<tr>
+<th>产品</th>
+<th>战略意图（一句话）</th>
+<th>对阿里云的价值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Qoder</strong></td>
+<td>把 AI IDE 升级为"人 + Agent 团队"的研发协作空间，从代码生成入口走向研发管理入口</td>
+<td>座席订阅 + 云沙箱按秒计费 + Qwen Token；Harness 底座复用</td>
+</tr>
+<tr>
+<td><strong>QoderWake</strong></td>
+<td>让 Agent 以"数字员工"身份常驻 IM、7×24 在岗、持续进化，用时间和记忆建立壁垒；本地起步、云端工位收口</td>
+<td>常驻 ECS/云电脑（CPU/内存）、记忆与轨迹存储、IM 长连接与事件流网络、无人时段 Token；对应 Agentic Computer / Agent Sandbox</td>
+</tr>
+<tr>
+<td><strong>千问办公</strong></td>
+<td>以"企业上下文"成为企业 Agent 的数据基建层，以钉钉组织体系给 Agent 发"工牌"，把 Agent 纳入组织</td>
+<td>企业数据压缩/结构化上云、Managed Agents 沙箱、审计日志；数据引力锁定</td>
+</tr>
+<tr>
+<td><strong>三者合力</strong></td>
+<td>Model（千问）/ Harness（Qoder）/ Context（千问办公）三线合围，云栖口号从"运营算力"转向"运营智力"</td>
+<td>Agent 成为云上"居民"，把间歇负载变成持续负载</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7-codearts-ppt">7. 对华为云码道 CodeArts 的洞察启示与观点（对应 PPT 底部蓝条）</h2>
+<p>以下为分析建议，供内部讨论取舍。</p>
+<h3 id="71">7.1 研判</h3>
+<ol>
+<li><strong>对手已把"多人多 Agent 协同"当作 Coding Agent 的下一个主战场</strong>，而非可选功能。Qoder 项目/讨论、QoderWake 群组、千问办公协作空间在同一周发布，是有组织的战略动作。</li>
+<li><strong>对手的短板在"研发管理深度"</strong>：Qoder 的项目只是轻量 Issue 看板，无需求/迭代/评审/流水线/制品等 DevOps 闭环；结论回写靠人工；成员靠链接邀请；Agent 不可跨成员共享。这恰是 CodeArts 作为一站式 DevOps 平台的存量优势。</li>
+<li><strong>对手的长板在"Agent 常驻组织 + 记忆进化 + 云端工位"叙事</strong>：QoderWake 的五层记忆、Anti-Rot 治理、成长时间线、"第 90 天专家级"是目前最完整的自进化产品化表达。</li>
+</ol>
+<h3 id="72">7.2 观点与建议</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>观点</th>
+<th>具体建议</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>以"项目"为一等实体而非"会话"</strong></td>
+<td>码道应把 Agent 会话、讨论、任务天然挂在 CodeArts 已有的项目 / 需求 / 迭代 / 代码仓 / 流水线对象上，让 Agent 能读写需求、评审、流水线状态，做到"讨论结论自动回写需求/任务"，而非 Qoder 式人工回写</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>多层记忆是研发场景的天然优势，应先做深</strong></td>
+<td>定义 <strong>个人记忆（开发者偏好）→ 项目/代码库记忆（架构、约定、测试命令）→ 团队/群记忆（评审共识、口径）→ 企业记忆（编码规范、安全基线、架构资产、合规）</strong> 四级，明确每级的写入门槛、可见范围、版本回滚与冲突治理；对标 QoderWake 的"最小必要范围"原则与 Anti-Rot 治理，并补上对手尚未打通的"企业级"一层</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>数字员工 = 有身份、有权限、有成长轨迹的 Agent</strong></td>
+<td>借鉴千问办公"工牌"（部门、负责人、授权范围、生命周期、可停用、可审计）和 QoderWake"成长时间线"（记忆/技能演进可视化、自进化产物可回滚），把 Agent 纳入企业 IAM 与审计体系，这是政企客户的采购前提</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>多 Agent 团队要绑定研发 SOP</strong></td>
+<td>以"需求分析 Agent → 编码 Agent → 测试 Agent → 评审 Agent → 人工验收"的研发流水线式协作为默认模板，Leader 拆解、成员并行、失败回传、人工门禁；支持团队级 SOP/协作指令的沉淀与复用（对标 Waker 群技能 / WakerFlow）</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>IM 是入口，不是终点</strong></td>
+<td>打通 WeLink 等企业 IM，实现"群里 @ 一个机器人、后台路由到多个专业 Agent、结果回群并沉淀记忆"的 @Waker 模式；同时保证结论回流到 CodeArts 项目对象，避免知识只留在群聊</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>云端工位是带动通算的抓手</strong></td>
+<td>提供"Agent 常驻工位"（云主机 / 云桌面 / 沙箱）作为码道数字员工的默认运行环境，明确 CPU/内存/存储/网络按用量计费模型（对标 Qoder 沙箱按秒计费、5%–10% 占比），把研发 Agent 的 7×24 值守（告警分诊、CI 失败初诊、依赖升级、代码巡检）变成持续性云负载；配合鲲鹏/昇腾算力与对象存储做"算网存协同"的差异化</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>用"执行即经验"补齐持续进化</strong></td>
+<td>把每次 Agent 任务的轨迹（工具调用、验证结果、人工纠正、重做）结构化为可学习信号，归因沉淀为记忆 / Skill / 验证规则 / 流程模板，并提供治理（降权、合并、撤回、回滚）与可视化；先在"代码评审规则"和"测试策略"两类高频、可验证的场景落地</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>与对手错位：深度 vs 广度</strong></td>
+<td>阿里三线并进、覆盖全岗位；码道应聚焦"研发全流程 + 企业级治理"的深度，做到"Agent 团队能在 CodeArts 内完成一个需求从提出到上线的闭环"，再向 IM、办公扩展</td>
+</tr>
+</tbody>
+</table>
+<h3 id="73-ppt">7.3 一句话观点（可直接放 PPT 蓝条）</h3>
+<blockquote>
+<p>阿里正把 Coding Agent 从"个人工具"升级为"常驻云端、拥有记忆与身份的组织成员"，并以项目/讨论、IM 群组、企业上下文三条线抢占多人多 Agent 协同入口；码道 CodeArts 应依托 DevOps 全流程对象与企业级治理，做深"项目为中心的人机团队协作 + 个人/项目/团队/企业四级记忆 + 云端常驻工位"，把研发 Agent 的持续运行转化为华为云通算与智算的增量负载。</p>
+</blockquote>
+<hr />
+<h2 id="8-ppt">8. 一页 PPT 结构映射（按附件模板）</h2>
+<p><strong>标题</strong>：阿里云：Qoder、QoderWake、千问办公打造多人多 Agent 协作入口</p>
+<table>
+<thead>
+<tr>
+<th>栏位</th>
+<th>Qoder（左栏）</th>
+<th>QoderWake（中栏）</th>
+<th>千问办公（右栏）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>项目 / 功能介绍</strong></td>
+<td>项目（Issue 看板、状态机、Repo 关联、Agent 创建）；讨论（@同事/@Agent、关键消息、附件上下文）；自定义 Agent + Agent Team（负责人 + 1–4 成员）；云端自动化 + Cloud Agents 1.0（沙箱按秒计费）；企业版内测 9/23</td>
+<td><strong>多人多 Agent 协同</strong>：Waker 群组（Leader 拆解、跨设备成员、协作 SOP）、WakerFlow、专家求助；<strong>结合 IM</strong>：钉钉/飞书/企微常驻、@Waker 统一入口路由、觉醒模式、多任务并行插话；<strong>长期记忆数字员工</strong>：个人/项目/群/成员/单聊五层记忆 + 四层上下文，MEMORY.md 版本回滚、成长时间线、Anti-Rot 自进化（27.6 万记忆、12.3 万技能、2.28 万自进化）；<strong>云端</strong>：云电脑/ECS/计算巢工位、远程 Waker</td>
+<td>企业上下文（压缩、结构化、公司/部门分级、周期刷新、专属模型）；数字员工"工牌"（部门、负责人、授权、生命周期、可审计）；协作空间（人-Agent、Agent-Agent 同空间分工、产出沉淀）；应用 + 安全中心 + Managed Agents；富立卡三 Agent 流转案例</td>
+</tr>
+<tr>
+<td><strong>产品战略意图</strong></td>
+<td>AI IDE → 研发协作入口；座席 + 沙箱 + Token 三重计费；Harness 底座复用</td>
+<td>Agent → 常驻组织的数字员工；记忆与时间建壁垒；本地获客、云端工位收口，带动 ECS/云电脑（CPU/内存）、记忆与轨迹存储、IM/事件流网络、无人时段 Token（呼应"Agent 是云上居民"、Agentic Computer）</td>
+<td>企业上下文成为 Agent 数据基建层；借钉钉组织体系给 Agent 发身份；原子化嵌入既有系统；数据引力锁定</td>
+</tr>
+<tr>
+<td><strong>观点（蓝条）</strong></td>
+<td>见 7.3 一句话观点 + 7.2 中 2–3 条精选（项目为中心、四级记忆、云端工位）</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="9">9. 参考资料</h2>
+<h3 id="2026">阿里云 / 云栖大会 2026</h3>
+<ul>
+<li>[R1] 新浪财经《全文 | 阿里吴泳铭最新演讲：未来机器思考的总量将达到人类的 1000 倍以上》2026-09-22 https://finance.sina.com.cn/hy/hyjz/2026-09-22/doc-inissitf7053669.shtml</li>
+<li>[R2] 凤凰网《2026 云栖大会阿里巴巴吴泳铭谈 AI：机器智能时代的代表性产品还没出现》 https://feng.ifeng.com/c/8wcvixxTxOl</li>
+<li>[R3] 网界 / 雷峰网《阿里云 CTO 李飞飞：面向 Model、Harness 和 Context 构建 Agentic Cloud》2026-09-22 https://www.cnu.com.cn/digital/202609/294424.html ；https://www.leiphone.com/category/industrynews/HNWVHr1WinHMKzsN.html</li>
+<li>[R4] 腾讯新闻《2026 云栖大会｜阿里高管全景解读》2026-09-22 https://news.qq.com/rain/a/20260922A05MGL00</li>
+<li>[R5] 新华网《推出系列新品 阿里云加速构建 Agentic Cloud》2026-09-22 http://www.news.cn/tech/20260922/6bd1c77079d74175a692fca1b3f13edd/c.html</li>
+</ul>
+<h3 id="qoder">Qoder</h3>
+<ul>
+<li>[Q1] Qoder CN 更新日志（含 9/23 项目与讨论、智能体团队、云端自动化、Skill 自进化建议；8 月底"全新 Qoder"发布词） https://docs.qoder.cn/product-overview/qoder-update-log</li>
+<li>[Q2] 阿里云开发者社区《一文读懂阿里云 Qoder 智能体工作台》2026-09-02 https://developer.aliyun.com/article/1759903</li>
+<li>[Q3] Qoder 文档《项目》 https://docs.qoder.com/zh/qoder/projects</li>
+<li>[Q4] Qoder 文档《讨论》 https://docs.qoder.com/zh/qoder/discussions</li>
+<li>[Q5] A5 站长网《Qoder 发布"项目"和"讨论"功能，支持多人与 Agent 协作》2026-09-24 https://www.admin5.com/article/20260924/16703554.shtml</li>
+<li>[Q6] Qoder 文档《自定义智能体》 https://docs.qoder.com/zh/qoder/custom-agents</li>
+<li>[Q7] Qoder 文档《自定义智能体团队》 https://docs.qoder.com/zh/qoder/custom-agent-teams</li>
+<li>[Q8] Qoder 文档《Agent Teams（CLI）》 https://docs.qoder.com/zh/cli/agent-teams</li>
+<li>[Q9] Qoder CN 文档《Multiagent 编排（Cloud Agents）》 https://docs.qoder.cn/cloud-agents/multi-agents</li>
+<li>[Q10] 阿里云开发者社区《Qoder Cloud Agents 1.0 发布》2026-09-17 https://developer.aliyun.com/article/1764047</li>
+<li>[Q11] Qoder 文档《Cloud Agents 使用指引（Forward / Managed Mode）》 https://docs.qoder.com/zh/cloud-agents/api/overview</li>
+<li>[Q12] Qoder CN 文档《云端环境》 https://docs.qoder.cn/cloud-agents/environments</li>
+<li>[Q13] Qoder CN 文档《容器参考》 https://docs.qoder.cn/cloud-agents/container-reference</li>
+<li>[Q14] Qoder 文档《Cloud Agents 计费》 https://docs.qoder.com/zh/cloud-agents/billing</li>
+<li>[Q15] Qoder 文档《服务账号专用资源包》 https://docs.qoder.com/zh/account/enterprise/service-account-credits-pack</li>
+<li>Qoder 官网 Cloud Agents 页 https://qoder.com/zh/cloud-agents</li>
+</ul>
+<h3 id="qoderwake">QoderWake</h3>
+<ul>
+<li>[W1] Qoder 官方博客《QoderWake: 你的下一批员工上线！》2026-04-30 https://github.com/QoderAI/blog-zh_CN/releases/tag/qoderwake</li>
+<li>[W2] Qoder 文档《QoderWake 更新日志》（2026-05-26 公测 至 2026-09-03 1.0） https://docs.qoder.com/zh/release-notes/qoderwake</li>
+<li>[W3] 阿里云开发者社区《QoderWake 1.0 正式发布：从桌面里的 Agent，到工作现场的数字员工》2026-09-07 https://developer.aliyun.com/article/1761240</li>
+<li>[W4] 阿里云开发者社区《告别单会话 Agent，QoderWake1.0 正式发布：7×24 值守数字员工如何重塑企业人机协同》2026-09-15 https://developer.aliyun.com/article/1763365</li>
+<li>[W5] BT 财经《近 10 万个数字员工被创建，一半任务没人吩咐就干了》 https://businesstimescn.com/articles/625688.html</li>
+<li>[W6] Qoder 文档《@Waker（IM 配置）》 https://docs.qoder.com/zh/qoderwake/im-configuration ；《团队 IM 协作：@Waker 实践》 https://docs.qoder.com/zh/qoderwake/at-waker-im-best-practices</li>
+<li>[W7] Qoder 文档《@Waker 专家配置最佳实践》 https://docs.qoder.com/zh/qoderwake/at-waker-experts-best-practices</li>
+<li>[W8] Qoder 文档《Waker 管理》 https://docs.qoder.com/zh/qoderwake/manage-wakers ；Qoder CN《QoderWake 产品简介》 https://docs.qoder.cn/qoderwake/overview</li>
+<li>[W9] Qoder 文档《记忆系统》 https://docs.qoder.com/zh/qoderwake/memory</li>
+<li>[W10] Jam's Blog《QoderWake - 阿里 Qoder 团队推出的生产级 AI 数字员工平台》 https://www.jamlee.net/archives/5454/</li>
+<li>[W11] Qoder 文档《在云电脑和 ECS 上部署 QoderWake》 https://docs.qoder.com/zh/qoderwake/ecs-deployment</li>
+<li>[W12] 阿里云开发者社区《【AI 尝鲜实验室】QoderWake：全天在线的 AI 数字员工（计算巢一键部署）》 https://developer.aliyun.com/article/1741486</li>
+<li>[W13] 阿里云开发者社区《QoderWake 与数字员工：从概念到部署》2026-08-20 https://developer.aliyun.com/article/1757179</li>
+<li>Qoder CN 官网 QoderWake 页 https://qoder.com.cn/qoderwake</li>
+</ul>
+<h3 id="_1">千问办公</h3>
+<ul>
+<li>[T1] 新浪科技《千问办公发布企业上下文，让 Agent 更懂企业、懂业务》2026-09-22 https://finance.sina.com.cn/jjxw/2026-09-22/doc-inissuii2076052.shtml</li>
+<li>[T2] 环球网 / 新浪财经《2026 云栖大会：AI 办公让个人提效了，组织为何没变快？》2026-09-23 https://finance.sina.com.cn/jjxw/2026-09-23/doc-inisuxfz6110490.shtml</li>
+<li>[T3] 品玩《千问办公把"企业上下文"做成了产品》2026-09-23 https://www.pingwest.com/a/317711</li>
+<li>[T4] 读懂 AI 时代《千问办公发布企业级 Agent 产品矩阵，同步推出 AI 硬件 QwenNote A2》 https://www.readaitime.com/news/2026-09-22/10itagpt ；东方财富《让 Agent 深入业务流程，千问办公发布"企业上下文"》 https://finance.eastmoney.com/a/202609223881327671.html</li>
+<li>[T5] 凤凰网《千问办公推出软硬"全家桶"！对话副总裁束骏亮》 https://tech.ifeng.com/c/8whTNwvKgJ3</li>
+<li>[T6] 界面新闻《对话千问办公副总裁束骏亮：Agent 的核心取决于给他多少上下文》 https://www.jiemian.com/article/15131716.html</li>
+<li>[T7] 21 经济网《对话千问办公束骏亮：AI 办公的赛点还没到，上下文才是护城河》2026-09-24 https://www.21jingji.com/article/20260924/herald/f2928358ee9310acb5f57168d92dee8a.html</li>
+<li>[T8] 澎湃新闻《千问办公用户破 3000 万，Agent、IM、Context 能否定义下一阶段竞争？》 https://www.thepaper.cn/newsDetail_forward_34009895</li>
+<li>[T9] 界面新闻《千问办公想要和 WorkBuddy 做出差异化》 https://www.jiemian.com/article/15047650.html</li>
+<li>[T10] 千问 AI 平台文档《Managed Agents 概述》 https://platform.qianwenai.com/docs/agent-infra/managed-agents</li>
+<li>新浪科技《千问办公押注的企业上下文，是 Agent 时代的组织语言》 https://finance.sina.com.cn/tech/roll/2026-09-22/doc-inissyrc5629001.shtml</li>
+<li>阿里云帮助中心《千问办公 Web 端使用链路》 https://help.aliyun.com/zh/qwenwork/qw-web-usage</li>
+</ul>
+<h3 id="_2">待补充 / 存疑项</h3>
+<ul>
+<li>QoderWake 累计任务数：官方稿为"约 2000 万次"[W4]，BT 财经、用你 AI 转载为"约 200 万次"[W5]，引用前建议核对 Qoder 官方公众号原文。</li>
+<li>千问办公"协作空间"的产品操作文档尚未在阿里云帮助中心公开，细节以发布会报道为准。</li>
+<li>Qoder 项目/讨论与 Qoder Cloud Agents 云端执行是否打通（当前文档表明协作场景 Agent 在拥有者设备执行），需持续跟踪。</li>
+<li>QoderWake 与千问办公"企业上下文"是否会直接集成，目前为分析推断，无官方表态。</li>
+</ul></body></html>
