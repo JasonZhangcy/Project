@@ -374,7 +374,7 @@
 - [T1] 新浪科技《千问办公发布企业上下文，让 Agent 更懂企业、懂业务》2026-09-22 https://finance.sina.com.cn/jjxw/2026-09-22/doc-inissuii2076052.shtml
 - [T2] 环球网 / 新浪财经《2026 云栖大会：AI 办公让个人提效了，组织为何没变快？》2026-09-23 https://finance.sina.com.cn/jjxw/2026-09-23/doc-inisuxfz6110490.shtml
 - [T3] 品玩《千问办公把"企业上下文"做成了产品》2026-09-23 https://www.pingwest.com/a/317711
-- [T4] 读懂 AI 时代《千问办公发布企业级 Agent 产品矣阵，同步推出 AI 硬件 QwenNote A2》 https://www.readaitime.com/news/2026-09-22/10itagpt ；东方财富《让 Agent 深入业务流程，千问办公发布"企业上下文"》 https://finance.eastmoney.com/a/202609223881327671.html
+- [T4] 读懂 AI 时代《千问办公发布企业级 Agent 产品矩阵，同步推出 AI 硬件 QwenNote A2》 https://www.readaitime.com/news/2026-09-22/10itagpt ；东方财富《让 Agent 深入业务流程，千问办公发布"企业上下文"》 https://finance.eastmoney.com/a/202609223881327671.html
 - [T5] 凤凰网《千问办公推出软硬"全家桶"！对话副总裁束骏亮》 https://tech.ifeng.com/c/8whTNwvKgJ3
 - [T6] 界面新闻《对话千问办公副总裁束骏亮：Agent 的核心取决于给他多少上下文》 https://www.jiemian.com/article/15131716.html
 - [T7] 21 经济网《对话千问办公束骏亮：AI 办公的赛点还没到，上下文才是护城河》2026-09-24 https://www.21jingji.com/article/20260924/herald/f2928358ee9310acb5f57168d92dee8a.html
