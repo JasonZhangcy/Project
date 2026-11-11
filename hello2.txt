@@ -1,0 +1,4 @@
+hello2.txt - 云端沙箱生成，用于验证"本地客户端编辑直接写云端"模型。
+创建时间: 2026-11-11 UTC
+branch: trae/agent-P3crxi
+本地资源管理器应该看不到此文件，除非你已 git fetch + checkout 到该分支。
