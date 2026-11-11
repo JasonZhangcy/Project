@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>贪吃蛇 - 云端生成</title>
+<style>
+  body { margin: 0; background: #1a1a2e; color: #eee; font-family: sans-serif;
+         display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding-top: 20px; }
+  h1 { margin: 10px; font-size: 20px; }
+  #info { margin: 8px; font-size: 14px; color: #aaa; }
+  canvas { background: #0f0f1e; border: 2px solid #16213e; border-radius: 6px; box-shadow: 0 0 20px #0f3460; }
+  #score { font-size: 18px; color: #e94560; font-weight: bold; }
+  button { margin-top: 14px; padding: 8px 20px; font-size: 14px; background: #e94560;
+           border: none; border-radius: 4px; color: #fff; cursor: pointer; }
+  button:hover { background: #ff6b6b; }
+</style>
+</head>
+<body>
+<h1>🐍 贪吃蛇</h1>
+<div id="info">方向键或 WASD 控制 · 空格暂停 · <span id="score">0</span></div>
+<canvas id="c" width="400" height="400"></canvas>
+<button onclick="restart()">重新开始</button>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('score');
+const SIZE = 20;          // 格子数 (20x20)
+const PX = canvas.width / SIZE;
+let snake, dir, nextDir, food, score, gameOver, paused, tick;
+
+function reset() {
+  snake = [{x:10, y:10}, {x:9, y:10}, {x:8, y:10}];
+  dir = {x:1, y:0}; nextDir = dir;
+  placeFood();
+  score = 0; gameOver = false; paused = false;
+  scoreEl.textContent = score;
+  if (tick) clearInterval(tick);
+  tick = setInterval(step, 120);
+}
+
+function placeFood() {
+  while (true) {
+    const f = {x: Math.floor(Math.random()*SIZE), y: Math.floor(Math.random()*SIZE)};
+    if (!snake.some(s => s.x === f.x && s.y === f.y)) { food = f; return; }
+  }
+}
+
+function step() {
+  if (gameOver || paused) return;
+  dir = nextDir;
+  const head = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
+  // 撞墙
+  if (head.x < 0 || head.y < 0 || head.x >= SIZE || head.y >= SIZE) return over();
+  // 撞自己
+  if (snake.some(s => s.x === head.x && s.y === head.y)) return over();
+  snake.unshift(head);
+  if (head.x === food.x && head.y === food.y) {
+    score++; scoreEl.textContent = score; placeFood();
+  } else {
+    snake.pop();
+  }
+  draw();
+}
+
+function draw() {
+  ctx.fillStyle = '#0f0f1e';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // 食物
+  ctx.fillStyle = '#e94560';
+  ctx.beginPath();
+  ctx.arc(food.x*PX + PX/2, food.y*PX + PX/2, PX/2 - 2, 0, Math.PI*2);
+  ctx.fill();
+  // 蛇
+  snake.forEach((s, i) => {
+    ctx.fillStyle = i === 0 ? '#0f3460' : '#16213e';
+    ctx.fillRect(s.x*PX + 1, s.y*PX + 1, PX - 2, PX - 2);
+    if (i === 0) {
+      ctx.fillStyle = '#e94560';
+      ctx.fillRect(s.x*PX + PX/2 - 2 + dir.x*3, s.y*PX + PX/2 - 2 + dir.y*3, 4, 4);
+    }
+  });
+  if (gameOver) overlay('游戏结束', '点击"重新开始"再来一局');
+  if (paused && !gameOver) overlay('已暂停', '按空格继续');
+}
+
+function overlay(t, s) {
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 28px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(t, canvas.width/2, canvas.height/2 - 10);
+  ctx.font = '14px sans-serif';
+  ctx.fillText(s, canvas.width/2, canvas.height/2 + 16);
+}
+
+function over() { gameOver = true; draw(); clearInterval(tick); }
+function restart() { reset(); }
+
+document.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  const opposite = {x: -dir.x, y: -dir.y};
+  const set = (x, y) => { if (!(dir.x === -x && dir.y === -y)) nextDir = {x, y}; };
+  if (k === 'arrowup' || k === 'w')    { set(0, -1); e.preventDefault(); }
+  else if (k === 'arrowdown' || k === 's')  { set(0, 1);  e.preventDefault(); }
+  else if (k === 'arrowleft' || k === 'a')  { set(-1, 0); e.preventDefault(); }
+  else if (k === 'arrowright' || k === 'd') { set(1, 0);  e.preventDefault(); }
+  else if (k === ' ') { if (!gameOver) paused = !paused; draw(); e.preventDefault(); }
+});
+
+reset();
+</script>
+</body>
+</html>
