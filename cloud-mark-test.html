@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><title>云端验证标记</title></head>
+<body>
+<h1>这是云端 Agent 在 $(date -u) 生成的文件</h1>
+<p>提交 SHA: b101ac0 后新建，branch=trae/agent-P3crxi</p>
+<p>请在本地编辑器 / 文件资源管理器 / GitHub 仓库检查此文件是否出现。</p>
+<p>机器 hostname: $(hostname)  时间: $(date -u "+%Y-%m-%d %H:%M:%S UTC")</p>
+</body>
+</html>
+cd /workspace && echo "=== 提交前状态 ===" && git status -sb && git add cloud-mark-test.html && git commit -m "cloud: add marker html to verify sync" && git push -q origin trae/agent-P3crxi && echo "=== push 后 ===" && git log --oneline -2 && ls -la cloud-mark-test.html
+__tr_native_ec=$?; pwd -P >| '/var/log/tool/command-execution/89e37591640c237d8c4177ac79621824/cwd.txt'; exit "$__tr_native_ec"
